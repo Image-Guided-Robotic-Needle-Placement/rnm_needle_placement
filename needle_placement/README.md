@@ -26,5 +26,17 @@ catkin_make
 ```ros
 rosrun needle_placement forward_kinematics.py
 ```
+**Testing the forward kinematics node**
+
+- `end_effector_pose` is the topic that publishes the direct kinematics result
+- `tf` publishes the transformation matrix from `base_link` to `end_effector`
+
+```ros
+rostopic echo /end_effector_pose 
+```
+and (from the project description)
+```ros
+rosrun tf tf_echo panda_link0 panda_link8
+```
 
 
