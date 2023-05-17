@@ -1,6 +1,8 @@
 #Performing forward knematics for franka panda robot (converting joint positions to a robot space in cartesian space)
 # current joint positions can be accessed from the topic /joint_states
 
+#!/usr/bin/env python3
+
 import rospy
 import numpy as np
 from sensor_msgs.msg import JointState
@@ -10,12 +12,12 @@ import tf
 
 class ForwardKinematics:
     def __init__(self):
-        rospy.init_node("forward_kinematics", anonymous = True)
         self.jointstate_subscriber = rospy.Subscriber("/joint_states", JointState, self.jointstate_callback)
+        #parameters (taken form https://frankaemika.github.io/docs/control_parameters.html#denavithartenberg-parameters)
         self.alpha = np.array([0, -np.pi/2, np.pi/2, np.pi/2, -np.pi/2, np.pi/2, np.pi/2])
-        self.a = np.array([0, 0, 0, 0.0825, -0.0825, 0, 0])
+        self.a = np.array([0, 0, 0, 0.0825, -0.0825, 0, 0.088])
         self.d = np.array([0.333, 0, 0.316, 0, 0.384, 0, 0.107])
-        self.r = rospy.Rate(10)
+        self.r = rospy.Rate(1)
 
     def jointstate_callback(self, msg):
         self.q = np.array(msg.position, dtype = np.float64)
@@ -34,12 +36,13 @@ class ForwardKinematics:
         return tf_matrix_between_frames
 
     def forward_kinematics(self):
-        #from base(0) to end effector(6)
-        for i in range(0, 7):
+        
+        for i in range(len(self.q)):
             if i == 0:
                 T_0_7 = self.dh_between_frames(self.q[i], self.a[i], self.alpha[i], self.d[i])
             else:
-                T_0_7 = np.dot(T_0_7, self.dh_between_frames(self.q[i], self.a[i], self.alpha[i], self.d[i]))        
+                T_0_7 = np.dot(T_0_7, self.dh_between_frames(self.q[i], self.a[i], self.alpha[i], self.d[i]))
+                    
         #Converting tf_matrix to position and orientation to publish as a pose type msg 
         # https://answers.ros.org/question/379109/transformation-matrices-to-geometry_msgspose/
         q = tf.transformations.quaternion_from_matrix(T_0_7)
@@ -54,6 +57,7 @@ class ForwardKinematics:
         return pose
 
 if __name__ == "__main__":
+    rospy.init_node("forward_kinematics")
     fk = ForwardKinematics()
     while not rospy.is_shutdown():
         rospy.spin()
