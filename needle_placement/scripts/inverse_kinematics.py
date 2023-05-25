@@ -75,12 +75,12 @@ class InverseKinematics:
     def inverse_kinematics(self):
         #TODO: #define the q_init, A_init and A_final
 
-        q_current = np.array([0, 0, 0, 0, 0, 0, 0]).reshape(7,1)
-        A_current = self.A_lambdified(*(q_current.flatten()))
-        q_rand = np.array([5, 5, 5, 5, 5, 5, 5]).reshape(7,1)
-        A_final = self.A_lambdified(*(q_rand.flatten()))
-        q, _ = self.incremental_ik(q_current, A_current, A_final)
-        return q
+        self.current_angles = np.array([0,0,0,0,0,0,0]).reshape(7,1)  
+        self.current_pose = self.A_lambdified(*(self.current_angles.flatten()))
+        self.final_angles = np.array([0.8,0.8,0.8,0.8,0.8,0.8,0.8]).reshape(7,1)
+        self.final_pose = self.A_lambdified(*(self.final_angles.flatten()))
+        desired_angles, _ = self.incremental_ik(self.current_angles, self.current_pose, self.final_pose)
+        return desired_angles
     
 if __name__ == "__main__":
     rospy.init_node("inverse_kinematics")
