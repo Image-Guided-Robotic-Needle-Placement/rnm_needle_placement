@@ -1,12 +1,12 @@
+
 #Performing forward knematics for franka panda robot (converting joint positions to a robot space in cartesian space)
 # current joint positions can be accessed from the topic /joint_states
-
-#!/usr/bin/env python3
 
 import rospy
 import numpy as np
 from sensor_msgs.msg import JointState
 from geometry_msgs.msg import Pose
+from std_msgs.msg import Float64MultiArray
 import tf
 
 
@@ -19,12 +19,17 @@ class ForwardKinematics:
         self.d = np.array([0.333, 0, 0.316, 0, 0.384, 0, 0.107])
         self.r = rospy.Rate(1)
 
+
     def jointstate_callback(self, msg):
         self.q = np.array(msg.position, dtype = np.float64)
         #publishing the pose message we calculated using forward kinematics
-        pose_in_cartesian = self.forward_kinematics()
+        pose_in_cartesian, matrix = self.forward_kinematics_solver(self.q)
+        self.tf_matrix_pub = rospy.Publisher("/tf_matrix", Float64MultiArray, queue_size = 10)
         self.pose_pub = rospy.Publisher("/end_effector_pose", Pose, queue_size = 10)
         self.pose_pub.publish(pose_in_cartesian)
+        tf_matrix = Float64MultiArray()  #for future use
+        tf_matrix.data = matrix.flatten()
+        self.tf_matrix_pub.publish(tf_matrix)
         self.r.sleep()
 
     def dh_between_frames(self, q, a, alpha, d):
@@ -35,13 +40,13 @@ class ForwardKinematics:
                                           [0, 0, 0, 1]])
         return tf_matrix_between_frames
 
-    def forward_kinematics(self):
+    def forward_kinematics_solver(self, q):
         
-        for i in range(len(self.q)):
+        for i in range(len(q)):
             if i == 0:
-                T_0_7 = self.dh_between_frames(self.q[i], self.a[i], self.alpha[i], self.d[i])
+                T_0_7 = self.dh_between_frames(q[i], self.a[i], self.alpha[i], self.d[i])
             else:
-                T_0_7 = np.dot(T_0_7, self.dh_between_frames(self.q[i], self.a[i], self.alpha[i], self.d[i]))
+                T_0_7 = np.dot(T_0_7, self.dh_between_frames(q[i], self.a[i], self.alpha[i], self.d[i]))
                     
         #Converting tf_matrix to position and orientation to publish as a pose type msg 
         # https://answers.ros.org/question/379109/transformation-matrices-to-geometry_msgspose/
@@ -54,28 +59,10 @@ class ForwardKinematics:
         pose.orientation.y = q[1]
         pose.orientation.z = q[2]
         pose.orientation.w = q[3]
-        return pose
+        return pose, T_0_7
 
 if __name__ == "__main__":
     rospy.init_node("forward_kinematics")
     fk = ForwardKinematics()
     while not rospy.is_shutdown():
         rospy.spin()
-
-# pose.position.x = T_0_7[0, 3]
-# pose.position.y = T_0_7[1, 3]
-# pose.position.z = T_0_7[2, 3]
-# pose.orientation.x = T_0_7[0, 0]
-# pose.orientation.y = T_0_7[1, 0]
-# pose.orientation.z = T_0_7[2, 0]
-# pose.orientation.w = 1
-#return pose
-
-# T_0_7 = self.dh_between_frames(self.q[0], self.a[0], self.alpha[0], self.d[0])
-# for i in range(1, 7):
-#     T_0_7 = np.dot(T_0_7, self.dh_between_frames(self.q[i], self.a[i], self.alpha[i], self.d[i]))
-# return T_0_7
-
-    
-
-

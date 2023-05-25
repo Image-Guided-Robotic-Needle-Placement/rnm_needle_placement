@@ -11,6 +11,7 @@ find_package(catkin REQUIRED COMPONENTS
   geometry_msgs
   rospy
   sensor_msgs
+  std_msgs
 )
 
 ## System dependencies are found with CMake's conventions
@@ -161,6 +162,8 @@ include_directories(
 ## in contrast to setup.py, you can choose the destination
 catkin_install_python(PROGRAMS
   scripts/forward_kinematics.py
+  scripts/inverse_kinematics.py
+  scripts/inverse_.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
