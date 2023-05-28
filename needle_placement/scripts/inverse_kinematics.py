@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 import rospy
-import sys
 from sensor_msgs.msg import JointState
 from geometry_msgs.msg import Pose
 import warnings
@@ -9,21 +8,19 @@ warnings.filterwarnings("ignore", category=DeprecationWarning)
 import tf
 import numpy as np
 from numba import jit
-from sympy import lambdify, symbols, Matrix, Abs, cos, sin, pi
-
-q1, q2, q3, q4, q5, q6, q7 = symbols('theta1:8')
+from sympy import lambdify, symbols, Matrix, cos, sin, pi, eye
+q1, q2, q3, q4, q5, q6, q7 = symbols('theta1, theta2, theta3, theta4, theta5, theta6, theta7')
 d, a, alpha, theta = symbols('d a alpha theta')
 
 class InverseKinematics:
     def __init__(self):     
         self.joint_state_subscriber = rospy.Subscriber("/joint_states", JointState, self.pose_callback)
         self.joint_angles_publisher = rospy.Publisher("/goal_states", JointState, queue_size = 10)
-        self.r = rospy.Rate(1)
-        self.joint_angles = Matrix([q1, q2, q3, q4, q5, q6, q7])
+        self.jointangles = [q1, q2, q3, q4, q5, q6, q7]
         #dh parameters
-        self.alpha = np.array([0, -np.pi/2, np.pi/2, np.pi/2, -np.pi/2, np.pi/2, np.pi/2])
-        self.a = np.array([0, 0, 0, 0.0825, -0.0825, 0, 0.088])
-        self.d = np.array([0.333, 0, 0.316, 0, 0.384, 0, 0.107])
+        self.alpha = [0, -pi/2, pi/2, pi/2, -pi/2, pi/2, pi/2]
+        self.a = [0, 0, 0, 0.0825, -0.0825, 0, 0.088]
+        self.d = [0.333, 0, 0.316, 0, 0.384, 0, 0.107]
         self.jointstate = JointState()
 
     def pose_callback(self, msg):
@@ -31,31 +28,27 @@ class InverseKinematics:
            Gets the current joint angles and calculates FK and IK.
            publishes the joint angles to the /goal_states topic.
         """
-        self.q = np.array(msg.position)
-        self.DK = self.dh_calculation(self.q)    
+        self.current_joint_position = np.array(msg.position)
+        self.DK = self.dh_calculation()    
         DK = self.DK[0:3, 0:4]
         self.A = DK.transpose().reshape(12, 1)
-        self.J = self.A.jacobian(self.joint_angles)
+        self.J = self.A.jacobian(self.jointangles)
         self.A_lambdified = jit(lambdify((q1, q2, q3, q4, q5, q6, q7), self.A, 'numpy'), nopython=True)       #issues in no_python argument
         self.J_lambdified = jit(lambdify((q1, q2, q3, q4, q5, q6, q7), self.J, 'numpy'), nopython=True)
-        self.q = self.inverse_kinematics()
+        self.desired_joint_position = self.inverse_kinematics()
 
         #publishing the returned list/array as a JointState message
-        self.jointstate.position = self.q.flatten()
+        self.jointstate.position = self.desired_joint_position.flatten()
         self.joint_angles_publisher.publish(self.jointstate)
-        self.r.sleep()
         
-    def dh_calculation(self, q):
-        q = q.flatten() 
-        q = [0,0,0,0,0,0,0]
-        DK = np.identity(4)
-        #general transformation matrix
-        transform = Matrix([[cos(theta), -sin(theta), 0, a],
-                            [sin(theta)*cos(alpha), cos(theta)*cos(alpha), -sin(alpha), -sin(alpha)*d],
-                            [sin(theta)*sin(alpha), cos(theta)*sin(alpha), cos(alpha), cos(alpha)*d],
-                            [0, 0, 0, 1]])
-        for i in range(len(q)):
-            DK = DK @ transform.subs({theta: q[i], alpha: self.alpha[i], a: self.a[i], d: self.d[i]})
+    def dh_calculation(self):
+        DK = eye(4)
+        for i, (alpha, a, d, theta) in enumerate(zip(reversed(self.alpha), reversed(self.a), reversed(self.d), reversed(self.jointangles))):
+            dh_between_frames = Matrix([[cos(theta), -sin(theta), 0, a],
+                                        [cos(alpha)*sin(theta), cos(theta)*cos(alpha), -sin(alpha), -sin(alpha)*d],
+                                        [sin(theta)*sin(alpha), cos(theta)*sin(alpha), cos(alpha), cos(alpha)*d],
+                                        [0, 0, 0, 1]])
+            DK = dh_between_frames @ DK
         return DK
 
     def incremental_ik(self, q_current, A_current, A_final, step=0.1, atol = 1e-6):
@@ -70,17 +63,18 @@ class InverseKinematics:
             q_current = q_current + delta_q
             A_current = self.A_lambdified(*(q_current.flatten()))
             delta_A = (A_final - A_current)
+            #print("error: ", np.max(np.abs(delta_A)))
         return q_current, A_current
             
-    def inverse_kinematics(self):
-        #TODO: #define the q_init, A_init and A_final
-
-        q_current = np.array([0, 0, 0, 0, 0, 0, 0]).reshape(7,1)
+    def inverse_kinematics(self):  
+        #testing      
+        q_current = self.current_joint_position.reshape(7, 1)   #gets the current jointangles from /joint_states
         A_current = self.A_lambdified(*(q_current.flatten()))
-        q_rand = np.array([5, 5, 5, 5, 5, 5, 5]).reshape(7,1)
-        A_final = self.A_lambdified(*(q_rand.flatten()))
-        q, _ = self.incremental_ik(q_current, A_current, A_final)
-        return q
+        #desired pose is assumed for now, which increases all jointangles by factor of 1
+        random_pose = q_current + 1
+        A_final = self.A_lambdified(*(random_pose).flatten())  #final pose to be reached
+        q_final, A_final = self.incremental_ik(q_current, A_current, A_final)
+        return q_final
     
 if __name__ == "__main__":
     rospy.init_node("inverse_kinematics")

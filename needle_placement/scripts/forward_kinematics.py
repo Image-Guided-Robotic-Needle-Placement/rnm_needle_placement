@@ -1,7 +1,7 @@
 
 #Performing forward knematics for franka panda robot (converting joint positions to a robot space in cartesian space)
 # current joint positions can be accessed from the topic /joint_states
-
+#!/usr/bin/env python3
 import rospy
 import numpy as np
 from sensor_msgs.msg import JointState
@@ -13,24 +13,21 @@ import tf
 class ForwardKinematics:
     def __init__(self):
         self.jointstate_subscriber = rospy.Subscriber("/joint_states", JointState, self.jointstate_callback)
+        self.tf_matrix_pub = rospy.Publisher("/tf_matrix", Float64MultiArray, queue_size = 10)
+        self.pose_pub = rospy.Publisher("/end_effector_pose", Pose, queue_size = 10)
         #parameters (taken form https://frankaemika.github.io/docs/control_parameters.html#denavithartenberg-parameters)
         self.alpha = np.array([0, -np.pi/2, np.pi/2, np.pi/2, -np.pi/2, np.pi/2, np.pi/2])
         self.a = np.array([0, 0, 0, 0.0825, -0.0825, 0, 0.088])
         self.d = np.array([0.333, 0, 0.316, 0, 0.384, 0, 0.107])
-        self.r = rospy.Rate(1)
-
 
     def jointstate_callback(self, msg):
         self.q = np.array(msg.position, dtype = np.float64)
         #publishing the pose message we calculated using forward kinematics
         pose_in_cartesian, matrix = self.forward_kinematics_solver(self.q)
-        self.tf_matrix_pub = rospy.Publisher("/tf_matrix", Float64MultiArray, queue_size = 10)
-        self.pose_pub = rospy.Publisher("/end_effector_pose", Pose, queue_size = 10)
         self.pose_pub.publish(pose_in_cartesian)
         tf_matrix = Float64MultiArray()  #for future use
         tf_matrix.data = matrix.flatten()
         self.tf_matrix_pub.publish(tf_matrix)
-        self.r.sleep()
 
     def dh_between_frames(self, q, a, alpha, d):
         #general formula for transformation between two frames
