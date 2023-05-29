@@ -81,6 +81,3 @@ if __name__ == "__main__":
     ik = InverseKinematics()
     while not rospy.is_shutdown():
         rospy.spin()
-
-
-#test
