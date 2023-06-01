@@ -40,6 +40,13 @@ h,w = img.shape[:2]
    k4, k5, k6 are enabled by setting/calling the flag CALIB_RATIONAL_MODEL (Refer: https://docs.opencv.org/4.x/d9/d0c/group__calib3d.html#ga3207604e4b1a1758aa66acb6ed5aa65d)
 """
 ret, CameraMatrix, distCoeffs, rvecs, tvecs = cv2.calibrateCamera(objpoints, imgpoints, gray.shape[::-1], None, None, flags=cv2.CALIB_RATIONAL_MODEL)
+#save both the camera matrix and distortion coefficients in a single txt file  without using numpy
+with open('/home/selva/catkin_ws/src/needle_placement/scripts/calibration.txt', 'w') as f:
+    f.write('Camera Matrix:\n')
+    f.write(np.array2string(CameraMatrix, separator=', '))
+    f.write('\n')
+    f.write('Distortion Coefficients:\n')
+    f.write(np.array2string(distCoeffs, separator=', '))
 print("Camera matrix : \n")
 print(CameraMatrix)  #TODO: check for different number of images
 print("dist : \n")
