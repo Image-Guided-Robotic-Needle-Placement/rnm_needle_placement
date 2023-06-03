@@ -16,7 +16,7 @@ def main(topic, number_of_images):
     bag = rosbag.Bag(bagfile_path)
     bridge = CvBridge()
     count = 0
-    for topic, msg, t in bag.read_messages(topics=topic):
+    for topic, msg in bag.read_messages(topics=topic):
         count += 1
         if count % number_of_images == 0:
             cv_image = bridge.imgmsg_to_cv2(msg, desired_encoding='bgr8')
@@ -26,9 +26,8 @@ def main(topic, number_of_images):
 if __name__ == '__main__':
     """Creates images from a rosbag file
     topic: topic to be read from the rosbag file
-    number_of_images: number of images to be created"""
+    number_of_images: number of images to be extracted"""
 
-
-    image_dir = Path('/home/selva/catkin_ws/src/needle_placement/rosbag_images/')
+    image_dir = Path('/home/selva/catkin_ws/src/needle_placement/rosbag_images/depth_images')
     bagfile_path = Path('/home/selva/Downloads/calibration/calibration_bag/calibration.bag')
-    main(topic="/k4a/rgb/image_raw", number_of_images=60)
+    main(topic="/k4a/rgb/image_raw", number_of_images=30)
