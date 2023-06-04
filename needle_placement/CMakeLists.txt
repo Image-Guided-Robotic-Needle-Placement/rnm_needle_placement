@@ -163,8 +163,6 @@ include_directories(
 catkin_install_python(PROGRAMS
   scripts/forward_kinematics.py
   scripts/inverse_kinematics.py
-  scripts/camera_calibration.py
-  scripts/image_creator.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 

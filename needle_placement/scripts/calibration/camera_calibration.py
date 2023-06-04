@@ -7,14 +7,14 @@ import numpy as np
 import os
 import glob
 CHECKERBOARD = (8,5)
-criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 100, 1e-5)
+criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 1000, 1e-5)
 objpoints = []  #3d point in real world space
 imgpoints = []  #2d points in image plane
 
 # Defining the world coordinates for 3D points
 objp = np.zeros((CHECKERBOARD[0] * CHECKERBOARD[1], 3), np.float32)
 objp[:,:2] = np.mgrid[0:CHECKERBOARD[0], 0:CHECKERBOARD[1]].T.reshape(-1, 2)
-images = glob.glob('../rosbag_images/*.png')
+images = glob.glob('../../rosbag_images/*.png')
 for fname in images:
     img = cv2.imread(fname)
     img = cv2.resize(img, (2048, 1536)) #with regard to the result.txt file
@@ -51,10 +51,10 @@ for i in range(len(objpoints)):
 #writing the calibration results
 with open('./intrinsic_result.txt', 'w') as f:
     f.write('Camera Matrix:\n')
-    f.write(np.array2string(CameraMatrix, separator=', '))
+    f.write(np.array2string(CameraMatrix, precision=5))
     f.write('\n')
     f.write('Distortion Coefficients:\n')
-    f.write(np.array2string(distCoeffs, separator=', '))
+    f.write(np.array2string(distCoeffs, precision=6))
 
 print("Camera matrix : \n")
 print(CameraMatrix)
