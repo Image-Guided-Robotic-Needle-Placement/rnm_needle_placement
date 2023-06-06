@@ -6,7 +6,7 @@ import cv2
 import numpy as np
 import os
 import glob
-CHECKERBOARD = (8,5)
+CHECKERBOARD = (8, 5)
 criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 1000, 1e-5)
 objpoints = []  #3d point in real world space
 imgpoints = []  #2d points in image plane
@@ -14,7 +14,7 @@ imgpoints = []  #2d points in image plane
 # Defining the world coordinates for 3D points
 objp = np.zeros((CHECKERBOARD[0] * CHECKERBOARD[1], 3), np.float32)
 objp[:,:2] = np.mgrid[0:CHECKERBOARD[0], 0:CHECKERBOARD[1]].T.reshape(-1, 2)
-images = glob.glob('../../rosbag_images/*.png')
+images = glob.glob('../../rosbag_images/from_panda/*.png')
 for fname in images:
     img = cv2.imread(fname)
     img = cv2.resize(img, (2048, 1536)) #with regard to the result.txt file
@@ -30,8 +30,8 @@ for fname in images:
         img = cv2.drawChessboardCorners(img, CHECKERBOARD, corners2, ret)
         #savepath = "../rosbag_images/calibration_ouput/"
         #cv2.imwrite(os.path.join(savepath , 'calibresult'+str(fname[-5])+'.png'), img)
-        #cv2.imshow('img',img)
-        #cv2.waitKey(0)
+        cv2.imshow('img',img)
+        cv2.waitKey(0)
 
 cv2.destroyAllWindows()
 h,w = img.shape[:2]
@@ -49,7 +49,7 @@ for i in range(len(objpoints)):
     mean_error += error
 
 #writing the calibration results
-with open('./intrinsic_result.txt', 'w') as f:
+with open('./intrinsic_result_from_panda.txt', 'w') as f:
     f.write('Camera Matrix:\n')
     f.write(np.array2string(CameraMatrix, precision=5))
     f.write('\n')
@@ -65,7 +65,7 @@ print( "total error: {}".format(mean_error/len(objpoints)))
 #Extrinsic (if needed)
 objpoints = np.array(objpoints)
 imgpoints = np.array(imgpoints)
-with open('./extrinsic_result.txt', 'w') as f:
+with open('./extrinsic_result_from_panda.txt', 'w') as f:
     for i in range(len(objpoints)):
         ret, rvecs, tvecs = cv2.solvePnP(objpoints[i], imgpoints[i], CameraMatrix, distCoeffs) #(https://docs.opencv.org/4.x/d5/d1f/calib3d_solvePnP.html)
         rvecs = cv2.Rodrigues(rvecs)[0]

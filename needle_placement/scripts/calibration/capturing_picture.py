@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 import cv2
 #Selecting the available camera connected to the system
-cam = cv2.VideoCapture(0) # 0 for USB camera
+cam = cv2.VideoCapture(0)
+cam.isOpened()
 cam.set(cv2.CAP_PROP_AUTOFOCUS, 0)
 cv2.namedWindow("test")
 
-img_counter = 0
+img_counter = 30
 
 while True:
     ret, frame = cam.read()
@@ -13,7 +14,6 @@ while True:
         print("failed to grab frame")
         break
     cv2.imshow("test", frame)
-
     k = cv2.waitKey(1)
     if k%256 == 27:
          print("Escape hit, closing...")
