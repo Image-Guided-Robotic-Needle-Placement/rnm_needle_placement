@@ -1,5 +1,6 @@
 <?xml version="1.0" ?>
 <launch>
+
     <param name="robot_description" command="$(find xacro)/xacro --inorder $(find franka_description)/robots/panda_arm.urdf.xacro"/>
 
     <!-- GAZEBO arguments -->
@@ -10,6 +11,7 @@
     <arg name="headless" default="false"/>
     <arg name="debug" default="false"/>
     <arg name="load_gripper" default="false"/>
+
 
     <!--launch GAZEBO with own world configuration -->
     <include file="$(find gazebo_ros)/launch/empty_world.launch">

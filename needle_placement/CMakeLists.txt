@@ -163,6 +163,8 @@ include_directories(
 catkin_install_python(PROGRAMS
   scripts/forward_kinematics.py
   scripts/inverse_kinematics.py
+  scripts/panda_trajectory_node.py
+  scripts/panda_trajectory_advanced_node.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
