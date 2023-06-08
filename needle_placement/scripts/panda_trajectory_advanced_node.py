@@ -17,14 +17,13 @@ def perform_trajectory():
     panda_joints = ['panda_joint1','panda_joint2','panda_joint3','panda_joint4','panda_joint5',
                     'panda_joint6','panda_joint7']
     
-    point = SE3(0.7, -0.5, 0.0) #this is the point where we want to move the end effector
+    point = SE3(float(argv[0]) , float(argv[1]) , float(argv[2])) #this is the point where we want to move the end effector
     joint_angles = panda.ikine_LM(point).q
     goal_positions = joint_angles #this is the inverse kinematics solution for the point
     print("angles\n:", goal_positions)
-    #goal_positions = [ float(argv[0]) , float(argv[1]) , float(argv[2]) ,float(argv[3] ) ,
-    #                    float(argv[4]) , float(argv[5]) , float(argv[6])  ]
- 
-    rospy.loginfo("Goal Position set lets go ! ") 
+
+
+    rospy.loginfo("Wait a moment, I am on my way ! ") 
     rospy.sleep(1)
 
 
