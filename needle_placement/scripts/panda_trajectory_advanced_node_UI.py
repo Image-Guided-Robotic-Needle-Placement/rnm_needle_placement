@@ -24,8 +24,15 @@ def perform_trajectory():
     panda_joints = ['panda_joint1','panda_joint2','panda_joint3','panda_joint4','panda_joint5',
                     'panda_joint6','panda_joint7']
     
-    # This is the point where we want to move the end effector
-    point = SE3(0.2 , 0.3, 0.4) 
+    # Get point coordinates from command-line arguments
+    try:
+        point = SE3(float(sys.argv[1]) , float(sys.argv[2]) , float(sys.argv[3]))
+    except IndexError:
+        print("Error: not enough arguments. Please specify x, y and z coordinates.")
+        return
+    except ValueError:
+        print("Error: invalid arguments. Please make sure all arguments are numbers.")
+        return
 
     # Calculate inverse kinematics
     joint_angles = panda.ikine_LM(point).q
