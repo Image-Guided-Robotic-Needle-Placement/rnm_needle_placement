@@ -32,10 +32,11 @@ def action_interface():
     panda_rtb = rtb.models.URDF.Panda()
     for i in range(5):
         point = SE3(waypoints_sqaure[i])
-        joints_trajectory_points.append(np.append((panda_rtb.ikine_LM(point))[0] ,[0.4,0.4]  ))
+        joint_angles = panda_rtb.ikine_LM(point).q
+        joints_trajectory_points.append(joint_angles)
     rospy.loginfo('Inverse kinematics solved lets start Action !')
             
-    panda_client = actionlib.SimpleActionClient('panda/panda_controller/follow_joint_trajectory',
+    panda_client = actionlib.SimpleActionClient('/position_joint_trajectory_controller/follow_joint_trajectory',
                                                     FollowJointTrajectoryAction)
     panda_client.wait_for_server()
     rospy.loginfo('Server connection = Success !')
