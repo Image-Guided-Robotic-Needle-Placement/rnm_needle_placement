@@ -14,7 +14,7 @@ def perform_trajectory():
     contoller_name='/position_joint_trajectory_controller/command'
 
     # Create a publisher for the joint trajectory
-    trajectory_publihser = rospy.Publisher(contoller_name,JointTrajectory, queue_size=10)
+    trajectory_publisher = rospy.Publisher(contoller_name,JointTrajectory, queue_size=10)
 
     # Load the panda robot model
     panda = rtb.models.URDF.Panda()
@@ -47,7 +47,7 @@ def perform_trajectory():
     trajectory_msg.points[0].accelerations = [0.0 for i in panda_joints]
     trajectory_msg.points[0].time_from_start = rospy.Duration(3)
     rospy.sleep(1)
-    trajectory_publihser.publish(trajectory_msg)
+    trajectory_publisher.publish(trajectory_msg)
 
 
 if __name__ == '__main__':

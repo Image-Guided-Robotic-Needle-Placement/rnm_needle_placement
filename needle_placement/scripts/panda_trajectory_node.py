@@ -6,7 +6,7 @@ import sys
 def perform_trajectory():
     rospy.init_node('panda_trajectory_publisher')
     contoller_name='/position_joint_trajectory_controller/command'
-    trajectory_publihser = rospy.Publisher(contoller_name,JointTrajectory, queue_size=10)
+    trajectory_publisher = rospy.Publisher(contoller_name,JointTrajectory, queue_size=10)
     argv = sys.argv[1:]                         
     panda_joints = ['panda_joint1','panda_joint2','panda_joint3','panda_joint4','panda_joint5',
                     'panda_joint6','panda_joint7']
@@ -26,7 +26,7 @@ def perform_trajectory():
     trajectory_msg.points[0].accelerations = [0.0 for i in panda_joints]
     trajectory_msg.points[0].time_from_start = rospy.Duration(3)
     rospy.sleep(1)
-    trajectory_publihser.publish(trajectory_msg)
+    trajectory_publisher.publish(trajectory_msg)
 
 
 if __name__ == '__main__':
