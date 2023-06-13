@@ -12,6 +12,7 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   sensor_msgs
   std_msgs
+  tf
 )
 
 ## System dependencies are found with CMake's conventions
@@ -71,7 +72,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## Generate added messages and services with any dependencies listed here
 # generate_messages(
 #   DEPENDENCIES
-#   geometry_msgs#   sensor_msgs
+#   geometry_msgs#   sensor_msgs#   std_msgs
 # )
 
 ################################################
@@ -106,7 +107,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES needle_placement
-#  CATKIN_DEPENDS geometry_msgs rospy sensor_msgs
+#  CATKIN_DEPENDS geometry_msgs rospy sensor_msgs std_msgs tf
 #  DEPENDS system_lib
 )
 
@@ -160,12 +161,10 @@ include_directories(
 
 ## Mark executable scripts (Python etc.) for installation
 ## in contrast to setup.py, you can choose the destination
-catkin_install_python(PROGRAMS
-  scripts/forward_kinematics.py
-  scripts/inverse_kinematics.py
-  scripts/inverse_.py
-  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-)
+ catkin_install_python(PROGRAMS
+   scripts/inverse_kinematics.py
+   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+ )
 
 ## Mark executables for installation
 ## See http://docs.ros.org/melodic/api/catkin/html/howto/format1/building_executables.html
