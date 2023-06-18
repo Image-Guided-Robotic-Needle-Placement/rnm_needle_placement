@@ -7,17 +7,18 @@ import numpy as np
 import os
 import glob
 CHECKERBOARD = (8, 5)
+SQUARE_SIZE = 0.04
 criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 1000, 1e-5)
 objpoints = []  #3d point in real world space
 imgpoints = []  #2d points in image plane
 
 # Defining the world coordinates for 3D points
 objp = np.zeros((CHECKERBOARD[0] * CHECKERBOARD[1], 3), np.float32)
-objp[:,:2] = np.mgrid[0:CHECKERBOARD[0], 0:CHECKERBOARD[1]].T.reshape(-1, 2)
-images = glob.glob('../../rosbag_images/from_panda/*.png')
+objp[:,:2] = np.mgrid[0:CHECKERBOARD[0], 0:CHECKERBOARD[1]].T.reshape(-1, 2) * SQUARE_SIZE
+images = glob.glob('../../rosbag_images/*.png')
 for fname in images:
     img = cv2.imread(fname)
-    img = cv2.resize(img, (2048, 1536)) #with regard to the result.txt file
+    img = cv2.resize(img,(2048, 1536)) #with regard to the result.txt file
     gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
     # Find the chess board corners
     # If desired number of corners are found in the image then ret = true
@@ -49,12 +50,12 @@ for i in range(len(objpoints)):
     mean_error += error
 
 #writing the calibration results
-with open('./intrinsic_result_from_panda.txt', 'w') as f:
-    f.write('Camera Matrix:\n')
-    f.write(np.array2string(CameraMatrix, precision=5))
-    f.write('\n')
-    f.write('Distortion Coefficients:\n')
-    f.write(np.array2string(distCoeffs, precision=6))
+# with open('./intrinsic_result_from_panda.txt', 'w') as f:
+#     f.write('Camera Matrix:\n')
+#     f.write(np.array2string(CameraMatrix, precision=5))
+#     f.write('\n')
+#     f.write('Distortion Coefficients:\n')
+#     f.write(np.array2string(distCoeffs, precision=6))
 
 print("Camera matrix : \n")
 print(CameraMatrix)
@@ -63,19 +64,19 @@ print(distCoeffs)
 print( "total error: {}".format(mean_error/len(objpoints)))
 
 #Extrinsic (if needed)
-objpoints = np.array(objpoints)
-imgpoints = np.array(imgpoints)
-with open('./extrinsic_result_from_panda.txt', 'w') as f:
-    for i in range(len(objpoints)):
-        ret, rvecs, tvecs = cv2.solvePnP(objpoints[i], imgpoints[i], CameraMatrix, distCoeffs) #(https://docs.opencv.org/4.x/d5/d1f/calib3d_solvePnP.html)
-        rvecs = cv2.Rodrigues(rvecs)[0]
-        rvecs = rvecs.reshape(9)
-        tvecs = tvecs.reshape(3)
-        matrix = np.array([[rvecs[0], rvecs[1], rvecs[2], tvecs[0]],
-                                [rvecs[3], rvecs[4], rvecs[5], tvecs[1]],
-                                [rvecs[6], rvecs[7], rvecs[8], tvecs[2]],
-                                [0, 0, 0, 1]])
-        f.write('Image ' + str(i+1) + ':\n')
-        f.write(np.array2string(matrix, precision=6))
-        f.write('\n')
-        f.write('\n')
+# objpoints = np.array(objpoints)
+# imgpoints = np.array(imgpoints)
+# with open('./extrinsic_result_from_panda.txt', 'w') as f:
+#     for i in range(len(objpoints)):
+#         ret, rvecs, tvecs = cv2.solvePnP(objpoints[i], imgpoints[i], CameraMatrix, distCoeffs) #(https://docs.opencv.org/4.x/d5/d1f/calib3d_solvePnP.html)
+#         rvecs = cv2.Rodrigues(rvecs)[0]
+#         rvecs = rvecs.reshape(9)
+#         tvecs = tvecs.reshape(3)
+#         matrix = np.array([[rvecs[0], rvecs[1], rvecs[2], tvecs[0]],
+#                                 [rvecs[3], rvecs[4], rvecs[5], tvecs[1]],
+#                                 [rvecs[6], rvecs[7], rvecs[8], tvecs[2]],
+#                                 [0, 0, 0, 1]])
+#         f.write('Image ' + str(i+1) + ':\n')
+#         f.write(np.array2string(matrix, precision=6))
+#         f.write('\n')
+#         f.write('\n')

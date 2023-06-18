@@ -7,13 +7,14 @@ import numpy as np
 import os
 import glob
 CHECKERBOARD = (8,5)
+SQUARE_SIZE = 0.04
 criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 1000, 1e-6)
 objpoints = []  #3d point in real world space
 imgpoints = []  #2d points in image plane
 
 # Defining the world coordinates for 3D points
 objp = np.zeros((CHECKERBOARD[0] * CHECKERBOARD[1], 3), np.float32)
-objp[:,:2] = np.mgrid[0:CHECKERBOARD[0], 0:CHECKERBOARD[1]].T.reshape(-1, 2)
+objp[:,:2] = np.mgrid[0:CHECKERBOARD[0], 0:CHECKERBOARD[1]].T.reshape(-1, 2) * SQUARE_SIZE
 images = glob.glob('../../rosbag_images/depth_images/*.png')
 for fname in images:
     img = cv2.imread(fname)
@@ -28,8 +29,8 @@ for fname in images:
         corners2 = cv2.cornerSubPix(gray, corners, (11,11),(-1,-1), criteria)
         imgpoints.append(corners2)
         img = cv2.drawChessboardCorners(img, CHECKERBOARD, corners2, ret)
-        # cv2.imshow('img',img)  
-        # cv2.waitKey(0)
+        cv2.imshow('img',img)  
+        cv2.waitKey(0)
 
 cv2.destroyAllWindows()
 h,w = img.shape[:2]
