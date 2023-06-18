@@ -1,0 +1,8 @@
+gazebo_ros_control/pid_gains:
+  panda_joint1: {p: 1.0, i: 0.01, d: 0.001}
+  panda_joint2: {p: 1.0, i: 0.01, d: 0.001}
+  panda_joint3: {p: 1.0, i: 0.01, d: 0.001}
+  panda_joint4: {p: 1.0, i: 0.01, d: 0.001}
+  panda_joint5: {p: 1.0, i: 0.01, d: 0.001}
+  panda_joint6: {p: 1.0, i: 0.01, d: 0.001}
+  panda_joint7: {p: 1.0, i: 0.01, d: 0.001}
