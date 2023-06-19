@@ -5,7 +5,7 @@ from quintic_trajectory import calculate_all_joint_trajectories
 current_configuration = [0, 0, 0, 0, 0, 0, 0] # in radians
 desired_configuration = [1, 2, 3, 4, 5, 6, 7]
 duration = 5
-num_points = 6
+num_points = 100
 
 # Call the function
 trajectories = calculate_all_joint_trajectories(current_configuration, desired_configuration, duration, num_points)
