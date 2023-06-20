@@ -50,5 +50,5 @@ stitched_point_cloud = o3d.geometry.PointCloud()
 for point_cloud in point_clouds_pcds:
     stitched_point_cloud += ((point_cloud.transform(handeye_transformation_inverse)).transform(endeffector_transformation_inverse))
 
-
+# first global registration and then ICP -Robin
 
