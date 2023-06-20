@@ -24,12 +24,12 @@ def publish_trajectory(duration, num_points):
 
     # Wait for the initial joint states and desired joint states to be received
     while current_joint_states is None or desired_joint_states is None:
-        rospy.sleep(0.1)
+        rospy.sleep(0.01)
 
     while not rospy.is_shutdown():
         # Wait for new desired joint states
         while desired_joint_states is None:
-            rospy.sleep(0.1)
+            rospy.sleep(0.01)
 
         # Store the current desired joint states to compare later
         current_desired_joint_states = desired_joint_states
@@ -81,5 +81,5 @@ def main():
     except rospy.ROSInterruptException:
         pass
 
-if __name__ == '_main_':
+if __name__ == '__main__':
     main()

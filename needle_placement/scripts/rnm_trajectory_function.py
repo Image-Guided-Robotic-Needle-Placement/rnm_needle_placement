@@ -41,7 +41,7 @@ def trajectory_generation(current_configuration, desired_configuration):
     duration = round(10 * least_time)
     # print("duration: ",duration)
 
-    num_points = 5 #1000 * duration
+    num_points = 1000 * duration
     # print("num_points: ", num_points)
 
     # Calculating coefficients for joint 1
@@ -158,4 +158,4 @@ desired_configuration = [-0.16 , -0.67 , 2.75 , -0.94 , 0.30, 3.07, 0.66] # in r
 
 trajectories = trajectory_generation(current_configuration, desired_configuration)
 
-print(type(trajectories))
+print(trajectories)
