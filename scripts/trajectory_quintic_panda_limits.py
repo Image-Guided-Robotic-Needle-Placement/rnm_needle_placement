@@ -5,18 +5,18 @@ from std_msgs.msg import Float64MultiArray
 from sensor_msgs.msg import JointState
 import numpy as np
 
-# Default initial joint positions
+# Initial joint positions
 initial_positions = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
 
-# Default target joint angles
+# Target joint angles
 target_joint_angles = [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]  
 
 # Interrupt flag for stopping the current motion and starting a new one
 interrupt_trajectory = False
 
 # Robot velocity and acceleration limits
-max_velocity = 2.5*0.0001  # 2.5*0.00008 rad/s 
-max_acceleration = 25*0.0001  # 25.0*0.00008 rad/s² 
+max_velocity = np.radians([0.00087, 0.00087, 0.00100, 0.00075, 0.00130, 0.00135, 0.00135])  # rad/s
+max_acceleration = np.radians([0.006300, 0.006300, 0.006300, 0.006300, 0.006300, 0.006300, 0.006300])  # rad/s^2
 
 # Quintic Coefficients Calculation
 def calculate_quintic_coefficients(t0, tf, q0, qf, v0, vf, a0, af):
@@ -60,24 +60,24 @@ def move_to_target(t0):
         delta_q = abs(qf - q0)
 
         # Time needed to accelerate to max_velocity and decelerate to a stop
-        t_accel_decel = 2 * max_velocity / max_acceleration
+        t_accel_decel = 2 * max_velocity[joint_index] / max_acceleration[joint_index]
 
-        if delta_q / max_velocity > t_accel_decel:
+        if delta_q / max_velocity[joint_index] > t_accel_decel:
             # The joint can reach max_velocity
             # Time spent at max_velocity is the total time minus the acceleration and deceleration times
-            t_max_velocity = delta_q / max_velocity - t_accel_decel
+            t_max_velocity = delta_q / max_velocity[joint_index] - t_accel_decel
             tf_joint = t_accel_decel + t_max_velocity
         else:
             # The joint cannot reach max_velocity
             # Use the kinematic equation: delta_q = 0.5*a*t^2 to solve for time
-            tf_joint = np.sqrt(4 * delta_q / max_acceleration)
+            tf_joint = np.sqrt(4 * delta_q / max_acceleration[joint_index])
 
         tf_list.append(tf_joint)
 
     # Use the maximum time required as tf
     tf = max(tf_list)
 
-    for t in np.arange(t0, tf, 0.1): # 0.01
+    for t in np.arange(t0, tf, 0.1):
         if rospy.is_shutdown() or interrupt_trajectory:
             break
 
