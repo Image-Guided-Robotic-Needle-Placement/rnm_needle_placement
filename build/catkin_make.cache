@@ -1,0 +1,2 @@
+needle_placement
+-DCATKIN_DEVEL_PREFIX=/home/rnm-group2/group2/rnm_needle_placement/devel -DCMAKE_INSTALL_PREFIX=/home/rnm-group2/group2/rnm_needle_placement/install -G Unix Makefiles
