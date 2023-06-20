@@ -5,7 +5,7 @@ import rospy
 from std_msgs.msg import Float64MultiArray
 from sensor_msgs.msg import JointState
 import numpy as np
-from quintic_trajectory import calculate_all_joint_trajectories
+from rnm_trajectory_function import trajectory_generation
 
 current_joint_states = None
 desired_joint_states = None
@@ -38,8 +38,8 @@ def publish_trajectory(duration, num_points):
         trajectories = calculate_all_joint_trajectories(current_joint_states, desired_joint_states, duration, num_points)
 
         # Loop through the trajectory and publish each row
-        rate = rospy.Rate(1.0 / (duration / num_points))  # Publish frequency based on duration and num_points
-        # rate = rospy.Rate(1000)
+        #rate = rospy.Rate(1.0 / (duration / num_points))  # Publish frequency based on duration and num_points
+        rate = rospy.Rate(1000)
         for trajectory_point in trajectories:
             # Check if desired joint states have changed
             if desired_joint_states != current_desired_joint_states:
@@ -72,8 +72,8 @@ def main():
         sys.exit(1)
 
     # Extract duration and num_points from command-line arguments
-    duration = float(sys.argv[1])
-    num_points = int(sys.argv[2])
+    #duration = float(sys.argv[1])
+    #num_points = int(sys.argv[2])
 
     # Call the function to publish the trajectory
     try:
