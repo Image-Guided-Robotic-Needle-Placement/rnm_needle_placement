@@ -1,1 +1,4 @@
 rosparam set /target_joint_angles "[1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0]" 
+
+[ERROR] [1687256953.619381356]: libfranka: Move command aborted: motion aborted by reflex! ["joint_motion_generator_acceleration_discontinuity"]
+control_command_success_rate: 0.97
