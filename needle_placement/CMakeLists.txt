@@ -168,7 +168,10 @@ catkin_install_python(PROGRAMS
   scripts/panda_trajectory_advanced_node_UI.py
   scripts/initial_joint_state_publisher.py
   script/trajectory_publisher.py
+  script/trajectory_publisher_copy.py
   script/quintic_trajectory.py
+  script/trajectory_publisher_1.py
+  script/rnm_trajectory_function.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
