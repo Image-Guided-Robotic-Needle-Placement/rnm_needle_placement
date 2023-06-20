@@ -16,12 +16,12 @@ from cv_bridge import CvBridge
 import cv2
 import os
 
-class BagRecorderNode:
+class ImageRecorderNode:
     def __init__(self):
         self.reached_position = False
         self.bridge = CvBridge()
-        self.rgbimage_path = "/home/rnm-group2/group2/rnm_needle_placement/src/needle_placement/new/rgb_images/"
-        self.irimage_path = "/home/rnm-group2/group2/rnm_needle_placement/src/needle_placement/new/ir_images/"
+        self.rgbimage_path = "/home/rnm-group2/group2/rnm_needle_placement/src/needle_placement/lab/rgb_images/"
+        self.irimage_path = "/home/rnm-group2/group2/rnm_needle_placement/src/needle_placement/lab/ir_images/"
 
         self.subscriber = rospy.Subscriber('/goal_reached', Bool, self.reached_position_callback)
 
@@ -50,5 +50,5 @@ class BagRecorderNode:
 
 if __name__ == "__main__":
     rospy.init_node("bag_recorder_node")
-    node = BagRecorderNode()
+    node = ImageRecorderNode()
     rospy.spin()

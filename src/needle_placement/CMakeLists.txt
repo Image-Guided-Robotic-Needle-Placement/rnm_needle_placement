@@ -164,6 +164,7 @@ catkin_install_python(PROGRAMS
   scripts/forward_kinematics.py
   scripts/inverse_kinematics.py
   scripts/calibration/rosbag_record.py
+  scripts/model_registration.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
