@@ -5,7 +5,7 @@ import rospy
 from std_msgs.msg import Float64MultiArray
 from sensor_msgs.msg import JointState
 import numpy as np
-from rnm_trajectory_function import trajectory_generation
+from rnm_trajectory_function_numericaly import trajectory_generation
 
 current_joint_states = None
 desired_joint_states = None

@@ -1,4 +1,5 @@
 import numpy as np
+import matplotlib.pyplot as plt
 
 def trajectory_generation(current_configuration, desired_configuration):
 
@@ -16,9 +17,11 @@ def trajectory_generation(current_configuration, desired_configuration):
     joint_moving_time = np.round(joint_moving_time, 3)
 
     least_time = np.max(displacement)/2.175
+    print("leasttime:" ,least_time)
 
-    duration = np.round(10 * least_time)
-    num_points = 1000 #int(1000 * duration)
+    duration = np.round(200 * least_time)
+    print("duration:", duration)
+    num_points = int(1000 * duration)
 
     coefficients = np.zeros((7, 6))
     for joint in range(7):
@@ -30,15 +33,37 @@ def trajectory_generation(current_configuration, desired_configuration):
     intervals = np.linspace(0, duration, num_points)
 
     result_array = np.empty((num_points, 7))
+    velocity_array = np.empty((num_points, 7))
+    acceleration_array = np.empty((num_points, 7))
+    
     for i, t in enumerate(intervals):
         for joint in range(7):
             result_array[i, joint] = np.sum([coefficients[joint, j]*(t**j) for j in range(6)])
+            # velocity = derivative of position
+            velocity_array[i, joint] = np.sum([(j)*coefficients[joint, j]*(t**(j-1)) for j in range(1, 6)])
+            # acceleration = derivative of velocity
+            acceleration_array[i, joint] = np.sum([(j-1)*coefficients[joint, j]*(t**(j-2)) for j in range(2, 6)])
 
-    return result_array, duration, num_points
+    # live plot of the velocity and acceleration
+    for joint in range(7):
+        plt.figure(figsize=(14, 6))
+        plt.subplot(121)
+        plt.plot(intervals, velocity_array[:, joint])
+        plt.title(f'Joint {joint+1} Velocity')
+        plt.xlabel('Time')
+        plt.ylabel('Velocity')
 
-current_configuration = [-0.515 , 0.434 , 2.86 , -1.09 , 0.56, 2.3, 1.37] # in radians
-desired_configuration = [-0.16 , -0.67 , 2.75 , -0.94 , 0.30, 3.07, 0.66] # in radians
+        plt.subplot(122)
+        plt.plot(intervals, acceleration_array[:, joint])
+        plt.title(f'Joint {joint+1} Acceleration')
+        plt.xlabel('Time')
+        plt.ylabel('Acceleration')
+        plt.show()
 
-trajectories = trajectory_generation(current_configuration, desired_configuration)
+    return result_array
 
-print(trajectories)
+if __name__=="__main__":
+    current_configuration = [-0.515 , 0.434 , 2.86 , -1.09 , 0.56, 2.3, 1.37] # in radians
+    desired_configuration = [-0.16 , -0.67 , 2.75 , -0.94 , 0.30, 3.07, 0.66] # in radians
+
+    trajectories = trajectory_generation(current_configuration, desired_configuration)
