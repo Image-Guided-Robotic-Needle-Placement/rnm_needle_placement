@@ -5,7 +5,7 @@ import rospy
 from std_msgs.msg import Float64MultiArray
 from sensor_msgs.msg import JointState
 import numpy as np
-from quintic_trajectory import calculate_all_joint_trajectories
+from quintic_trajectory_old import calculate_all_joint_trajectories
 
 current_joint_states = None
 desired_joint_states = None

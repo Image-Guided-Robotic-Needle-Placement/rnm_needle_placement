@@ -1,5 +1,5 @@
 import numpy as np
-from quintic_trajectory import calculate_all_joint_trajectories
+from quintic_trajectory_old import calculate_all_joint_trajectories
 
 # Define the inputs
 current_configuration = [0, 0, 0, 0, 0, 0, 0] # in radians
