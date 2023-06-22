@@ -5,10 +5,11 @@ import numpy as np
 from std_msgs.msg import Float64MultiArray
 from sensor_msgs.msg import JointState
 from rnm_trajectory_function_numericaly import trajectory_generation
+import time 
 
 current_configuration = []
 
-
+start = time.time()
 def joint_states_callback(data):
     global current_configuration
     current_configuration = data.position
@@ -30,9 +31,10 @@ def talker():
             trajectories = trajectory_generation(current_configuration, desired_configuration)
             for traj in trajectories:
                 msg = Float64MultiArray()
+                print(time.time()-start)
                 msg.data = traj
                 pub.publish(msg)
-        rate.sleep()
+                rate.sleep()
 
 if __name__ == '__main__':
     try:

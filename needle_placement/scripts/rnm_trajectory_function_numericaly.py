@@ -17,7 +17,7 @@ def trajectory_generation(current_configuration, desired_configuration):
 
     least_time = np.max(displacement)/2.175
 
-    duration = np.round(800 * least_time)
+    duration = np.round(15 * least_time)
     num_points = int(1000 * duration)
 
     coefficients = np.zeros((7, 6))
@@ -33,7 +33,7 @@ def trajectory_generation(current_configuration, desired_configuration):
     for i, t in enumerate(intervals):
         for joint in range(7):
             result_array[i, joint] = np.sum([coefficients[joint, j]*(t**j) for j in range(6)])
-    print(result_array)
+    #print(result_array)
     return result_array
 
 
