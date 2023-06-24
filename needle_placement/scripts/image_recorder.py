@@ -48,8 +48,6 @@ class ImageRecorderNode:
             cv2.imwrite(rgb_filename, rgb_image)
             cv2.imwrite(ir_filename, ir_image)
             print("image saved")
-
-
 #            rospy.signal_shutdown("Recording and image extraction completed")
 
 if __name__ == "__main__":
