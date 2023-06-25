@@ -189,7 +189,7 @@ def calculateSmoothRobotTrajectory(q_init_array, q_final_array, drawPlot):
     least_time = np.max(displacement)/2.175
     print(f"least time = {np.max(displacement)}/2.175 = ",least_time)
 
-    factor = 15
+    factor = 50
     t = np.round(factor * least_time)  # t = duration = (factor * least_time)
     print(f"t = round({factor}*{least_time}) : ",t)
 
