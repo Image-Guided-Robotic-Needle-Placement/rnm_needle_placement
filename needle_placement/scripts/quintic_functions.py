@@ -5,8 +5,10 @@ def position(coefficients, t):
     """
     This function returns a joint angle at a given time
 
+    q(t) = c0 + c1*t + c2*t^2 + c3*t^3 + c4*t^4 + c5*t^5 
+
     Args:
-        coefficients: The coefficients obtained from getJointTrajectoryCoefficients function
+        coefficients: The coefficients obtained from getJointTrajectoryCoefficients function --> [c0, c1, c2, c3, c4, c5]
         t: The time from initial to final position
 
     Returns:
@@ -20,8 +22,10 @@ def velocity(coefficients, t):
     """
     This function returns a joint velocity at a given time
 
+    v = q_dot(t) = c1 + 2*c2*t + 3*c3*t^2 + 4*c4*t^3 + 5*c5*t^4 
+
     Args:
-        coefficients: The coefficients obtained from getJointTrajectoryCoefficients function
+        coefficients: The coefficients obtained from getJointTrajectoryCoefficients function --> [c0, c1, c2, c3, c4, c5]
         t: The time from initial to final position
 
     Returns:
@@ -36,8 +40,10 @@ def acceleration(coefficients, t):
     """
     This function returns a joint acceleration at a given time
 
+    a = q_dot_dot(t) = 2*c2 + 6*c3*t + 12*c4*t^2 + 20*c5*t^3 
+
     Args:
-        coefficients: The coefficients obtained from getJointTrajectoryCoefficients function
+        coefficients: The coefficients obtained from getJointTrajectoryCoefficients function --> [c0, c1, c2, c3, c4, c5]
         t: The time from initial to final position
 
     Returns:
@@ -70,6 +76,10 @@ def getJointTrajectoryCoefficients(q_init, q_final, t):
 
     # Constant vector [q0, v0, a0, qf, vf, af]
     B = np.array([q_init, 0, 0, q_final, 0, 0])
+
+    if np.abs(np.linalg.det(A)) < 1e-10:
+        raise ValueError("The coefficient matrix is singular. Unable to solve the linear system.")
+
 
     coefficients = np.linalg.solve(A, B)
     np.set_printoptions(suppress=True,precision=4)
@@ -120,7 +130,7 @@ def getJointsCoefficientMatrix(q_init_array, q_final_array, t):
     return coefficient_matrix
 
 
-def calculateRobotTrajectory(q_init_array, q_final_array, t, num_points):
+def calculateRobotTrajectory(q_init_array, q_final_array, t, num_points, drawPlot):
     """
     This function calculates the joint angles that are passed to the robot controller to follow particular trajectory
 
@@ -129,11 +139,15 @@ def calculateRobotTrajectory(q_init_array, q_final_array, t, num_points):
         q_final_array: array of desired 7 joint values
         t: time to move from current to desired joint values
         num_points: number of via-points
+        drawPlot: if this is set to True, it will plot velocity and acceleration graphs
 
     Returns:
         trajectory: A (num_points x 7) dimension matrix representing joint angles
 
     """
+    if drawPlot == True:
+        plotAllVelocityAndAcceleration(q_init_array, q_final_array, t, num_points)
+
     intervals = np.linspace(0, t, num_points)
     coefficient_matrix = getJointsCoefficientMatrix(q_init_array,q_final_array,t)
     trajectory = None
@@ -145,7 +159,7 @@ def calculateRobotTrajectory(q_init_array, q_final_array, t, num_points):
 
     return trajectory
 
-def calculateSmoothRobotTrajectory(q_init_array, q_final_array, t, num_points):
+def calculateSmoothRobotTrajectory(q_init_array, q_final_array, drawPlot):
     """
     This function calculates the joint angles that are passed to the robot controller to follow particular trajectory
     This function takess in account the maximum joint velocity limit of the robot
@@ -153,23 +167,39 @@ def calculateSmoothRobotTrajectory(q_init_array, q_final_array, t, num_points):
     Args:
         q_init_array: array of current 7 joint values
         q_final_array: array of desired 7 joint values
-        t: time to move from current to desired joint values
-        num_points: number of via-points
+        drawPlot: if this is set to True, it will plot velocity and acceleration graphs
 
     Returns:
         trajectory: A (num_points x 7) dimension matrix representing joint angles
 
     """
+    print("Current joint positions: ", np.round(q_init_array, 3))
+    print("Desired joint positions: ", q_final_array)
 
     displacement = np.abs(np.array(q_final_array) - np.array(q_init_array))
+    displacement = np.round(displacement,3)
+    print("Joint displacements: ", displacement)
 
-    joint_moving_time = displacement/2.175
+    joint_moving_time = displacement/2.175               # 2.175 is the joint velocity limit
     joint_moving_time = np.round(joint_moving_time, 3)
+    print("Minimum Joint Moving Time: ",joint_moving_time, "if at max velocity")
+
+    print("Max displacement: ", np.max(displacement))
 
     least_time = np.max(displacement)/2.175
+    print(f"least time = {np.max(displacement)}/2.175 = ",least_time)
 
-    t = np.round(15 * least_time)  # duration
-    num_points = int(1000 * t)
+    factor = 15
+    t = np.round(factor * least_time)  # t = duration = (factor * least_time)
+    print(f"t = round({factor}*{least_time}) : ",t)
+
+    num_points = int(1000 * t)    # num_points = (1000 * duration), so that the points on the trajectory are all 1 ms apart
+    print(f"num_points: {1000}*{t} : ",num_points)
+
+    if drawPlot == True:
+        plotAllVelocityAndAcceleration(q_init_array, q_final_array, t, num_points)
+
+    print("Calculating Trajectory...")
 
     intervals = np.linspace(0, t, num_points)
     coefficient_matrix = getJointsCoefficientMatrix(q_init_array,q_final_array,t)
@@ -261,10 +291,9 @@ if __name__ == '__main__':
     q_final_array = [-0.16, -0.67, 2.75, -0.94, 0.30, 3.07, 0.66]
 
     # To calculate the overall trajectory 
-    trajectory = calculateSmoothRobotTrajectory(q_init_array,q_final_array,t,num_points)
+    trajectory = calculateSmoothRobotTrajectory(q_init_array,q_final_array, True)
     print(trajectory)
 
     # To plot velocity and acceleration for all joints
-    plotAllVelocityAndAcceleration(q_init_array,q_final_array,t,num_points)
+    # plotAllVelocityAndAcceleration(q_init_array,q_final_array,t,num_points)
 
-    
