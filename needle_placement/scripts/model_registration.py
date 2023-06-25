@@ -8,8 +8,11 @@ from os.path import isfile, join
 # Inspired from http://www.open3d.org/docs/release/tutorial/pipelines/global_registration.html
 
 # CT scan
-reference_point_cloud_path = ...
-reference_point_cloud = o3d.io.read_point_cloud(reference_point_cloud_path)
+reference_point_cloud_path = "C:/Users/Razvan/Downloads/Skeleton_Target.stl"
+reference_point_cloud_mesh = o3d.io.read_triangle_mesh(reference_point_cloud_path)
+reference_point_cloud = reference_point_cloud_mesh.sample_points_poisson_disk(100000)
+o3d.visualization.draw_geometries([reference_point_cloud_mesh])
+o3d.visualization.draw_geometries([reference_point_cloud])
 
 # Captured pcds
 point_clouds_path = "/home/rnm-group2/group2/rnm_needle_placement/src/needle_placement/lab/pointclouds/*.pcd"
@@ -29,7 +32,10 @@ for transformation in endeffector_transformations:
 endeffector_transformations_inverse = np.array(endeffector_transformations_inverse)
 
 # Hand-eye calibration
-handeye_transformation = np.array([])  # get this pose from the handeye-calibration as np.array
+handeye_transformation = np.array([-0.787647, 0.0228546, -0.615207, 0.00111628],
+                                  [0.614978, -0.0192331, -0.787922, 0.0405029],
+                                  [-0.0298236, -0.999441, 0.00107771, 0.00306807],
+                                  [0, 0, 0, 1])
 handeye_transformation_inverse = np.linalg.inv(handeye_transformation)
 
 # Stitch all pcds together after bringing them in the world coordinate system (robot-base)
