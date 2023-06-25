@@ -291,7 +291,7 @@ if __name__ == '__main__':
     q_final_array = [-0.16, -0.67, 2.75, -0.94, 0.30, 3.07, 0.66]
 
     # To calculate the overall trajectory 
-    trajectory = calculateSmoothRobotTrajectory(q_init_array,q_final_array, True)
+    trajectory = calculateSmoothRobotTrajectory(q_init_array,q_final_array, True) # close the plot to calculate the trajectory
     print(trajectory)
 
     # To plot velocity and acceleration for all joints
