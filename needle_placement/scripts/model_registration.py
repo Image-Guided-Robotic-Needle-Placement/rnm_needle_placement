@@ -24,8 +24,10 @@ for file in listdir(point_clouds_path):
 point_clouds_pcds = []
 
 for point_cloud_file in point_clouds_files:
-    point_clouds_pcds.append(o3d.io.read_point_cloud(point_clouds_path + "/" + point_cloud_file))
-    # o3d.visualization.draw_geometries([o3d.io.read_point_cloud(point_clouds_path + "/" + point_cloud_file)])
+    temp_point_cloud = o3d.io.read_point_cloud(point_clouds_path + "/" + point_cloud_file)
+    temp_point_cloud.estimate_normals(search_param=o3d.geometry.KDTreeSearchParamHybrid(radius=0.1, max_nn=30))
+    point_clouds_pcds.append(temp_point_cloud)
+    # o3d.visualization.draw_geometries([temp_point_cloud])
 
 # End-effector poses
 endeffector_transformations = [np.array([[0.16495998, -0.03236812, 0.98576899, 0.28493194],
@@ -71,18 +73,20 @@ for index, point_cloud in enumerate(point_clouds_pcds):
         ((point_cloud.transform(handeye_transformation)).transform(endeffector_transformations[index]))
 
 # o3d.visualization.draw_geometries([stitched_point_cloud])
-o3d.io.write_point_cloud("teststiched.pcd", stitched_point_cloud)
+# o3d.io.write_point_cloud("teststiched.pcd", stitched_point_cloud)
 
 # First apply global registration in order to get a good approximation and then refine the registration using ICP
 def downsize_pcd(pcd, voxel_size):
     pcd_down = pcd.voxel_down_sample(voxel_size)
+    o3d.io.write_point_cloud("testdown.pcd", pcd_down)
+    # pcd_down = pcd
     radius_feature = voxel_size * 5
     pcd_fpfh = o3d.pipelines.registration.compute_fpfh_feature(pcd_down,
-                                            o3d.geometry.KDTreeSearchParamHybrid(radius=radius_feature, max_nn=100))
+                                            o3d.geometry.KDTreeSearchParamHybrid(radius=radius_feature, max_nn=10))
     return pcd_down, pcd_fpfh
 
 
-voxel_size = 0.05  # in meter
+voxel_size = 0.0005  # in meter
 distance_threshold = voxel_size * 1.5
 
 trans_init = np.asarray([[0.0, 0.0, 1.0, 0.0], [1.0, 0.0, 0.0, 0.0], [0.0, 1.0, 0.0, 0.0], [0.0, 0.0, 0.0, 1.0]])
