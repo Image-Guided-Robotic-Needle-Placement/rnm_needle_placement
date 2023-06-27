@@ -1,0 +1,4 @@
+<launch>
+    <node pkg="needle_placement" type="inverse_kinematics_node.py" name="inverse_kinematics_node" output="screen" />
+    <node pkg="needle_placement" type="trajectory_generator_node.py" name="trajectory_generator_node" output="screen" />
+</launch>

@@ -180,6 +180,13 @@ target_link_libraries(control_pid_node ${catkin_LIBRARIES})
    scripts/trajectory_pid.py
    scripts/trajectory_quintic_panda_limits.py
    scripts/trajectory_quintic_tf.py
+   src/inverse_kinematics_node.py
+   src/trajectory_generator_node.py
+   scripts/trajectory_quintic_panda_v_a_limitsv6.py
+   scripts/trajectory_quintic_panda_limitsv3.py
+   scripts/trajectory_planninig_plot.py
+   scripts/trajectory_quintic_panda_7_v_a_limits.py
+
 
 
    src/quintic_polynomial_node.py
