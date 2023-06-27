@@ -189,7 +189,7 @@ def calculateSmoothRobotTrajectory(q_init_array, q_final_array, drawPlot):
     least_time = np.max(displacement)/2.175
     print(f"least time = {np.max(displacement)}/2.175 = ",least_time)
 
-    factor = 50
+    factor = 60
     t = np.round(factor * least_time)  # t = duration = (factor * least_time)
     print(f"t = round({factor}*{least_time}) : ",t)
 
@@ -256,9 +256,9 @@ def plotAllVelocityAndAcceleration(q_init_array, q_final_array, t, num_points):
     """
     This function plots velocity vs time and acceleration vs time plots for each joint
     """
-    time = np.linspace(0, t, num_points)   
-    velocities = [getVelocityProfile(q_init, q_final, t, num_points) for q_init, q_final in zip(q_init_array, q_final_array)]
-    accelerations = [getAccelerationProfile(q_init, q_final, t, num_points) for q_init, q_final in zip(q_init_array, q_final_array)]
+    time = np.linspace(0, t*100, num_points)   
+    velocities = [getVelocityProfile(q_init, q_final, t*100, num_points) for q_init, q_final in zip(q_init_array, q_final_array)]
+    accelerations = [getAccelerationProfile(q_init, q_final, t*100, num_points) for q_init, q_final in zip(q_init_array, q_final_array)]
 
     # Create subplots
     fig, axs = plt.subplots(7, 2, figsize=(10, 14))  # 7 rows, 2 columns

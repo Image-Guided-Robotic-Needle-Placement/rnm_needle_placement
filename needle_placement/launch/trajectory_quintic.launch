@@ -1,0 +1,5 @@
+<launch>
+  <rosparam file="$(find needle_placement)/config/pid_parameters.yaml" command="load" />
+  <node pkg="needle_placement" type="control_pid_node" name="control_pid_node" output="screen" />
+  <node pkg="needle_placement" type="quintic_polynomial_node.py" name="quintic_polynomial_node" output="screen" />
+</launch>
