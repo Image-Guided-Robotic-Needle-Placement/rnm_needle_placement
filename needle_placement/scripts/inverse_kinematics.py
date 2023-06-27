@@ -75,9 +75,17 @@ class InverseKinematics:
         #just for testing       
         q_current = self.current_joint_position.reshape(7, 1)   #gets the current jointangles from /joint_states
         A_current = self.A_lambdified(*(q_current).flatten())   
+        print("A_current:", A_current)
         #desired pose is assumed for now, which increases all jointangles by factor of 1
-        random_pose = q_current + 1
-        A_final = self.A_lambdified(*(random_pose).flatten())  #final pose to be reached
+        #random_pose = q_current + 1
+        #A_final = self.A_lambdified(*(random_pose).flatten())  #final pose to be reached
+
+        #From test.py we calculated this matrix . Position and orientation should be same then in playground.txt (_ball)
+        A_final = np.array([[0.95085546, 0.29124849, 0.10511047, 0.301],  #desired pose
+                            [0.19840159, -0.83371212, 0.51532603, -0.139],
+                            [0.2377198, -0.46914648, -0.85052388, 0.266]])
+        A_final = A_final.T.reshape(-1, 1)
+        print("A_final:", A_final)    
         q_final, A_final = incremental_ik(q_current, A_current, A_final, self.A_lambdified, self.J_lambdified)
         return q_final
     
