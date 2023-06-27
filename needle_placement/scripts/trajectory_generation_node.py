@@ -18,12 +18,13 @@ def talker():
     rospy.init_node('trajectory_generation_node', anonymous=True)
     
     # Subscribe to the joint_states topic
-    rospy.Subscriber("/joint_states", JointState, joint_states_callback)
+    rospy.Subscriber("/joint_states_desired", JointState, joint_states_callback)
     
-    pub = rospy.Publisher('/joint_position_example_controller_sim/joint_command', Float64MultiArray, queue_size=10)
+    pub = rospy.Publisher('/joint_position_example_controller/joint_command', Float64MultiArray, queue_size=10)
     rate = rospy.Rate(1000) # 1000 Hz
     
     desired_configuration = [-0.16 , -0.67 , 2.75 , -0.94 , 0.30, 3.07, 0.66] # in radians
+    #desired_configuration = [-0.515 , 0.434 , 2.86 , -1.09 , 0.56, 2.3, 1.37] # in radians
     
     while not rospy.is_shutdown():
         # Check if current_configuration has been populated
