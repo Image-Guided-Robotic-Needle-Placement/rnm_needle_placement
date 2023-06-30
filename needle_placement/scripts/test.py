@@ -28,9 +28,9 @@ def rotation_matrix(phi, theta, psi):
 
     return R
 
-phi = np.radians(-151.119)  # Convert degrees to radians
-theta = np.radians(-13.752)
-psi = np.radians(11.786)
+phi = np.radians(-152.492)  # Convert degrees to radians
+theta = np.radians(-10.270)
+psi = np.radians(13.539)
 
 R = rotation_matrix(phi, theta, psi)
 print(R)
