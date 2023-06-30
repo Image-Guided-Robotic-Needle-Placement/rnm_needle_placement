@@ -22,13 +22,13 @@ def publish_trajectory():
     rospy.init_node('trajectory_publisher', anonymous=True)
 
     # Create publisher
-    pub = rospy.Publisher('/joint_position_example_controller/joint_command', Float64MultiArray, queue_size=10)
+    pub = rospy.Publisher('/joint_position_example_controller_sim/joint_command', Float64MultiArray, queue_size=10)
 
     # Subscribe to joint states topic
     rospy.Subscriber('/joint_states', JointState, joint_states_callback)
 
     # Subscribe to desired goal topic
-    rospy.Subscriber('/goal_states', JointState, desired_goal_callback)
+    rospy.Subscriber('/desired_goal_states', JointState, desired_goal_callback)
 
     # Wait for the initial joint states and desired joint states to be received
     while current_joint_states is None or desired_joint_states is None:
