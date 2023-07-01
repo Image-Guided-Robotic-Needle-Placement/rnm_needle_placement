@@ -1,11 +1,6 @@
 import numpy as np
-
-class PoseInterpolator:
-    def __init__(self, A_entry, A_ball):
-        self.A_entry = A_entry
-        self.A_ball = A_ball
-
-    def interpolate(self, t):
+   
+def interpolate(A_entry, A_ball, t):
         """
         Interpolate between the two poses
         Args:
@@ -14,7 +9,7 @@ class PoseInterpolator:
             Pose matrix of the interpolated pose
         """
         assert 0.0 <= t <= 1.0, "Interpolation parameter should be between 0 and 1"
-        return (1.0 - t) * self.A_entry + t * self.A_ball
+        return (1.0 - t) * A_entry + t * A_ball
 
 if __name__ == "__main__":
     A_entry = np.array([[ 0.95663454,  0.28769805,  0.04560904, 0.283],
@@ -27,8 +22,7 @@ if __name__ == "__main__":
                        [0.2377198, -0.46914648, -0.85052388, 0.266],
                        [0.0, 0.0, 0.0, 1.0]])
 
-    interpolator = PoseInterpolator(A_entry, A_ball)
 
     for t in np.linspace(0, 1, 10):
-        interpolated_pose = interpolator.interpolate(t)
+        interpolated_pose = interpolate(A_entry, A_ball, t)
         print(interpolated_pose)
