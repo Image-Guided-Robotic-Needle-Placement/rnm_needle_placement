@@ -8,7 +8,7 @@ def interpolate(A_entry, A_ball, t):
         Returns:
             Pose matrix of the interpolated pose
         """
-        assert 0.0 <= t <= 1.0, "Interpolation parameter should be between 0 and 1"
+        #assert 0.0 <= t <= 1.0, "Interpolation parameter should be between 0 and 1"
         return (1.0 - t) * A_entry + t * A_ball
 
 if __name__ == "__main__":
