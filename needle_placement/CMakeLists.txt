@@ -165,6 +165,7 @@ catkin_install_python(PROGRAMS
   scripts/inverse_kinematics.py
   scripts/quitic_trajectory_publisher.py
   scripts/interpolation_trajectory_publisher.py
+  script/quintic_trajectory_publisher_sim_copy.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 

@@ -28,7 +28,7 @@ def publish_trajectory():
     rospy.Subscriber('/joint_states', JointState, joint_states_callback)
 
     # Subscribe to desired goal topic
-    rospy.Subscriber('/desired_goal_states', JointState, desired_goal_callback)
+    rospy.Subscriber('/goal_states', JointState, desired_goal_callback)
 
     # Wait for the initial joint states and desired joint states to be received
     while current_joint_states is None or desired_joint_states is None:

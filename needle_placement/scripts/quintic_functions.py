@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import sys
 
 def position(coefficients, t): 
     """
@@ -67,6 +68,7 @@ def getJointTrajectoryCoefficients(q_init, q_final, t):
         The coefficients [c0,c1,c2,c3,c4,c5] for quintic trajectory
     """
     # Coefficient Matrix
+    
     A = np.array([[1, 0, 0, 0, 0, 0],
                 [0, 1, 0, 0, 0, 0],
                 [0, 0, 2, 0, 0, 0],
@@ -76,15 +78,18 @@ def getJointTrajectoryCoefficients(q_init, q_final, t):
 
     # Constant vector [q0, v0, a0, qf, vf, af]
     B = np.array([q_init, 0, 0, q_final, 0, 0])
+    
+    
+    try:
+        coefficients = np.linalg.solve(A, B)
+        np.set_printoptions(suppress=True,precision=4)
 
-    if np.abs(np.linalg.det(A)) < 1e-10:
-        raise ValueError("The coefficient matrix is singular. Unable to solve the linear system.")
-
-
-    coefficients = np.linalg.solve(A, B)
-    np.set_printoptions(suppress=True,precision=4)
-
-    return coefficients
+        if np.abs(np.linalg.det(A)) < 1e-10:
+            raise ValueError("The coefficient matrix is singular. Unable to solve the linear system.")
+            
+        return coefficients
+    except:
+        return []
 
 def calculateJointTrajectory(q_init, q_final, t, num_points):
     """
@@ -291,9 +296,9 @@ if __name__ == '__main__':
     q_final_array = [-0.16, -0.67, 2.75, -0.94, 0.30, 3.07, 0.66]
 
     # To calculate the overall trajectory 
-    trajectory = calculateSmoothRobotTrajectory(q_init_array,q_final_array, True) # close the plot to calculate the trajectory
-    print(trajectory)
+    #trajectory = calculateSmoothRobotTrajectory(q_init_array,q_final_array, True) # close the plot to calculate the trajectory
+    #print(trajectory)
 
     # To plot velocity and acceleration for all joints
     # plotAllVelocityAndAcceleration(q_init_array,q_final_array,t,num_points)
-
+    print(type(getJointTrajectoryCoefficients(q_init_array[0],q_final_array[0],t)))
