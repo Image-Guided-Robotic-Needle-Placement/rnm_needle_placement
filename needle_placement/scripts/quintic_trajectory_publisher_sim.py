@@ -35,7 +35,7 @@ def publish_trajectory():
         rospy.sleep(0.1)
 
     # Calculate trajectory
-    trajectories = calculateSmoothRobotTrajectory(current_joint_states, desired_joint_states, True)
+    trajectories = calculateSmoothRobotTrajectory(current_joint_states, desired_joint_states, False)
     print("Trajectory calculated.....publishing....")
 
     # Loop through the trajectory and publish each row
