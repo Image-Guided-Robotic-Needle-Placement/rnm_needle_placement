@@ -19,7 +19,7 @@ def desired_goal_callback(msg):
 
 def publish_trajectory():
     # Create ROS node
-    rospy.init_node('trajectory_publisher', anonymous=True)
+    rospy.init_node('quintic_trajectory_publisher_sim', anonymous=True)
 
     # Create publisher
     pub = rospy.Publisher('/joint_position_example_controller_sim/joint_command', Float64MultiArray, queue_size=10)
