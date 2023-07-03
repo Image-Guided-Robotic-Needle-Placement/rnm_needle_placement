@@ -3,8 +3,32 @@ from sympy import symbols, Matrix, cos, sin, pi, eye
 from numba import jit
 from sympy import lambdify
 
+        
 # Define symbolic variables for 7 joint angles
 q1, q2, q3, q4, q5, q6, q7 = symbols('q1 q2 q3 q4 q5 q6 q7')
+    # Robot arm parameters
+alpha = [0, -pi/2, pi/2, pi/2, -pi/2, pi/2, pi/2]
+a = [0, 0, 0, 0.0825, -0.0825, 0, 0.088]
+d = [0.333, 0, 0.316, 0, 0.384, 0, 0.107]
+jointangles = [q1, q2, q3, q4, q5, q6, q7]
+
+# Compute the Direct Kinematics using the DH parameters
+DK = eye(4)
+for i, (alpha_i, a_i, d_i, theta_i) in enumerate(zip(reversed(alpha), reversed(a), reversed(d), reversed(jointangles))):
+    dh_between_frames = Matrix([[cos(theta_i), -sin(theta_i), 0, a_i],
+                                [cos(alpha_i)*sin(theta_i), cos(theta_i)*cos(alpha_i), -sin(alpha_i), -sin(alpha_i)*d_i],
+                                [sin(theta_i)*sin(alpha_i), cos(theta_i)*sin(alpha_i), cos(alpha_i), cos(alpha_i)*d_i],
+                                [0, 0, 0, 1]])
+    DK = dh_between_frames @ DK
+
+# Compute the Jacobian of the arm    
+DK = DK[0:3, 0:4]
+A = DK.transpose().reshape(12, 1)
+J = A.jacobian(jointangles)
+
+# Lambdify the direct kinematics and the Jacobian to use with numpy arrays
+A_lambdified = jit(lambdify((q1, q2, q3, q4, q5, q6, q7), A, 'numpy'), nopython=True)
+J_lambdified = jit(lambdify((q1, q2, q3, q4, q5, q6, q7), J, 'numpy'), nopython=True)
 
 # Define a function to compute incremental inverse kinematics
 @jit(nopython=True)
@@ -30,29 +54,6 @@ def incremental_ik(q, A_current, A_final, A_lambdified, J_lambdified, step=0.1, 
 
 # Function to perform inverse kinematics
 def inverse_kinematics(current_joint_position, A_final):
-    # Robot arm parameters
-    alpha = [0, -pi/2, pi/2, pi/2, -pi/2, pi/2, pi/2]
-    a = [0, 0, 0, 0.0825, -0.0825, 0, 0.088]
-    d = [0.333, 0, 0.316, 0, 0.384, 0, 0.107]
-    jointangles = [q1, q2, q3, q4, q5, q6, q7]
-    
-    # Compute the Direct Kinematics using the DH parameters
-    DK = eye(4)
-    for i, (alpha_i, a_i, d_i, theta_i) in enumerate(zip(reversed(alpha), reversed(a), reversed(d), reversed(jointangles))):
-        dh_between_frames = Matrix([[cos(theta_i), -sin(theta_i), 0, a_i],
-                                    [cos(alpha_i)*sin(theta_i), cos(theta_i)*cos(alpha_i), -sin(alpha_i), -sin(alpha_i)*d_i],
-                                    [sin(theta_i)*sin(alpha_i), cos(theta_i)*sin(alpha_i), cos(alpha_i), cos(alpha_i)*d_i],
-                                    [0, 0, 0, 1]])
-        DK = dh_between_frames @ DK
-
-    # Compute the Jacobian of the arm    
-    DK = DK[0:3, 0:4]
-    A = DK.transpose().reshape(12, 1)
-    J = A.jacobian(jointangles)
-
-    # Lambdify the direct kinematics and the Jacobian to use with numpy arrays
-    A_lambdified = jit(lambdify((q1, q2, q3, q4, q5, q6, q7), A, 'numpy'), nopython=True)
-    J_lambdified = jit(lambdify((q1, q2, q3, q4, q5, q6, q7), J, 'numpy'), nopython=True)
 
     # Current joint position and pose
     q_current = np.array(current_joint_position).reshape(7, 1)
@@ -62,6 +63,8 @@ def inverse_kinematics(current_joint_position, A_final):
     q_final, _ = incremental_ik(q_current, A_current, A_final, A_lambdified, J_lambdified)
 
     return q_final.flatten()
+
+_=inverse_kinematics([0.0]*7, np.eye(4)[:3,:4].T.reshape(-1, 1))
 
 if __name__ == "__main__":
 
