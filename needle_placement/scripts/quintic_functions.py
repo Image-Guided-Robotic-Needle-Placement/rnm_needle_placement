@@ -55,6 +55,18 @@ def acceleration(coefficients, t):
     acceleration = np.dot(coefficients,time)
     return acceleration
 
+
+#def getJointTrajectoryCoefficients(q_init, q_final, t):
+    #c0 = q_init
+    #c1 = 0
+    #c2 = 0
+    #c3 = (10/(t**3)) * (q_final - q_init)
+    #c4 = (-15/(t**4)) * (q_final - q_init)
+    #c5 = (6/(t**5)) * (q_final - q_init)
+
+    #return np.array([c0,c1,c2,c3,c4,c5])
+
+
 def getJointTrajectoryCoefficients(q_init, q_final, t):
     """
     This function calculates joint trajectory using quintic polynomial
@@ -68,7 +80,7 @@ def getJointTrajectoryCoefficients(q_init, q_final, t):
         The coefficients [c0,c1,c2,c3,c4,c5] for quintic trajectory
     """
     # Coefficient Matrix
-    
+
     A = np.array([[1, 0, 0, 0, 0, 0],
                 [0, 1, 0, 0, 0, 0],
                 [0, 0, 2, 0, 0, 0],
@@ -76,7 +88,7 @@ def getJointTrajectoryCoefficients(q_init, q_final, t):
                 [0, 1, 2*t, 3*(t**2), 4*(t**3), 5*(t**4)],
                 [0, 0, 2, 6*t, 12*(t**2), 20*(t**3)]])
 
-    # Constant vector [q0, v0, a0, qf, vf, af]
+    #Constant vector [q0, v0, a0, qf, vf, af]
     B = np.array([q_init, 0, 0, q_final, 0, 0])
     
     
@@ -89,7 +101,7 @@ def getJointTrajectoryCoefficients(q_init, q_final, t):
             
         return coefficients
     except:
-        return []
+       pass
 
 def calculateJointTrajectory(q_init, q_final, t, num_points):
     """
@@ -301,4 +313,4 @@ if __name__ == '__main__':
 
     # To plot velocity and acceleration for all joints
     # plotAllVelocityAndAcceleration(q_init_array,q_final_array,t,num_points)
-    print(type(getJointTrajectoryCoefficients(q_init_array[0],q_final_array[0],t)))
+    print(getJointTrajectoryCoefficients(q_init_array[0],q_final_array[0],t))
