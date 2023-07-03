@@ -37,7 +37,7 @@ def preprocess_point_cloud(pcd, voxel_size):
     return pcd_down, pcd_fpfh
 
 
-def load_point_clouds(voxel_size=0.01):
+def load_point_clouds(voxel_size=0.05):
     pcds = []
     pcds_down = []
     pcds_fpfh = []
@@ -62,7 +62,7 @@ def draw_registration_result(source, target, transformation):
 
 def generating_pointcloud_from_stl(reference_path):
     reference_pointcloud_mesh = o3d.io.read_triangle_mesh(reference_path)
-    reference_pointcloud = reference_pointcloud_mesh.sample_points_poisson_disk(50000)
+    reference_pointcloud = reference_pointcloud_mesh.sample_points_poisson_disk(10000)
     # o3d.visualization.draw_geometries([reference_pointcloud])
     return reference_pointcloud
 
@@ -92,19 +92,19 @@ def execute_global_registration(source_down, target_down, source_fpfh,
                                      target_fpfh, voxel_size):
 
     result = o3d.pipelines.registration.registration_ransac_based_on_feature_matching(
-        source_down, target_down, source_fpfh, target_fpfh, True, 100000 * voxel_size,
-        o3d.pipelines.registration.TransformationEstimationPointToPoint(True),
+        source_down, target_down, source_fpfh, target_fpfh, True, 10000 * voxel_size,
+        o3d.pipelines.registration.TransformationEstimationPointToPoint(False),
         3, [
             o3d.pipelines.registration.CorrespondenceCheckerBasedOnEdgeLength(
-                0.001),  # https://github.com/isl-org/Open3D/issues/2119
+                0.9),  # https://github.com/isl-org/Open3D/issues/2119
             o3d.pipelines.registration.CorrespondenceCheckerBasedOnDistance(
-                100000 * voxel_size)
-        ], o3d.pipelines.registration.RANSACConvergenceCriteria(100000, 0.99))
+                10000 * voxel_size)
+        ], o3d.pipelines.registration.RANSACConvergenceCriteria(1000000, 0.99))
     return result
 
 
 def refine_registration(source, target, voxel_size, trans):
-    distance_threshold = 100 * voxel_size
+    distance_threshold = 10 * voxel_size
     res = o3d.pipelines.registration.registration_icp(source, target, distance_threshold, trans)
     return res
 
@@ -112,7 +112,7 @@ def refine_registration(source, target, voxel_size, trans):
 
 if __name__ == '__main__':
 
-    voxel_size = 0.01
+    voxel_size = 0.02
     reference_path = "C:/Users/Razvan/Downloads/Skeleton_Target.stl"
     pcds, pcds_down, pcds_fpfh = load_point_clouds(voxel_size=voxel_size)
     endeffector_transformations_inverse = []
@@ -138,7 +138,8 @@ if __name__ == '__main__':
 
     # Stitch all pcds together after bringing them in the world coordinate system (robot-base)
     stitched_point_cloud = (pcds_down[0].transform(handeye_transformation)).transform(endeffector_transformations[0])
-    # stitched_copy = copy.deepcopy(stitched_point_cloud)
+    stitched_copy_before = copy.deepcopy(stitched_point_cloud)
+    stitched_copy_after = copy.deepcopy(stitched_point_cloud)
     for index, point_cloud in enumerate(pcds_down):
 
         if index == 0:
@@ -146,30 +147,35 @@ if __name__ == '__main__':
 
         # Firstly, bring the current point-cloud in the world coordinate system
         (point_cloud.transform(handeye_transformation)).transform(endeffector_transformations[index])
-        # stitched_copy += point_cloud
+        # stitched_copy_before += point_cloud
+        # o3d.visualization.draw_geometries([stitched_copy_before])
 
         stiched_fpfh = o3d.pipelines.registration.compute_fpfh_feature(stitched_point_cloud,
             o3d.geometry.KDTreeSearchParamHybrid(radius=voxel_size * 10, max_nn=100))
 
         # Secondly, do a global registration from the current point-cloud to the stiched one
-        # global_registration = execute_fast_global_registration(point_cloud, stitched_point_cloud, pcds_fpfh[index], stiched_fpfh)
-        global_registration = execute_global_registration(point_cloud, stitched_point_cloud, pcds_fpfh[index], stiched_fpfh, voxel_size)
-
-        # o3d.visualization.draw_geometries([stitched_copy])
-
+        global_registration = execute_fast_global_registration(point_cloud, stitched_point_cloud, pcds_fpfh[index], stiched_fpfh)
+        # global_registration = execute_global_registration(point_cloud, stitched_point_cloud, pcds_fpfh[index], stiched_fpfh, voxel_size)
+        point_cloud.transform(global_registration.transformation)
+        # stitched_copy_after += point_cloud
+        # o3d.visualization.draw_geometries([stitched_copy_after])
         # Ignore outliers
         if global_registration.inlier_rmse > 0.1:
             continue
 
         # Thirdly, do an ICP refinement
-        result = refine_registration(point_cloud, stitched_point_cloud, voxel_size, global_registration.transformation)
+        result = refine_registration(point_cloud, stitched_point_cloud, voxel_size, np.eye(4))
+
+        if result.inlier_rmse > 0.1:
+            continue
 
         stitched_point_cloud += point_cloud.transform(result.transformation)
         # o3d.visualization.draw_geometries([stitched_point_cloud])
-        stitched_point_cloud.voxel_down_sample(voxel_size)
+        # stitched_point_cloud.voxel_down_sample(voxel_size)
         # o3d.visualization.draw_geometries([stitched_point_cloud])
 
-    # o3d.visualization.draw_geometries([stitched_point_cloud])
+    stitched_point_cloud.voxel_down_sample(voxel_size)
+    o3d.visualization.draw_geometries([stitched_point_cloud])
     # o3d.io.write_point_cloud("stitched_new.pcd", stitched_point_cloud)
 
     stitched_down, scan_down, stitched_fpfh, scan_fpfh = prepare_dataset(voxel_size, reference_path, stitched_point_cloud)
