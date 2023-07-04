@@ -61,8 +61,14 @@ def inverse_kinematics(current_joint_position, A_final):
 
     # Compute the new joint angles using the incremental IK method
     q_final, _ = incremental_ik(q_current, A_current, A_final, A_lambdified, J_lambdified)
-
-    return q_final.flatten()
+    q_final = q_final.flatten()
+    for q in q_final:
+        if q > 2*np.pi:
+            q = q - 2*np.pi
+        elif q < -2*np.pi:
+            q = q + 2*np.pi
+    print(q_final)
+    return q_final
 
 _=inverse_kinematics([0.0]*7, np.eye(4)[:3,:4].T.reshape(-1, 1))
 
