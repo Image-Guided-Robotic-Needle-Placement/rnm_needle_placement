@@ -3,7 +3,6 @@
 import rospy
 import numpy as np
 from sensor_msgs.msg import JointState
-from std_msgs.msg import Float64MultiArray
 from inverse_kinematics_function import inverse_kinematics
 import time
 
@@ -52,5 +51,5 @@ if __name__ == "__main__":
         time.sleep(10)
         pub.publish(joint_angles_msg)
         rate.sleep()
-
+    
     rospy.signal_shutdown('Finished publishing all angles')  # Shutdown the node
