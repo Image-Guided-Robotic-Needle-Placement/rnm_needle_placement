@@ -5,6 +5,7 @@ import numpy as np
 from sensor_msgs.msg import JointState
 from std_msgs.msg import Float64MultiArray
 from inverse_kinematics_function import inverse_kinematics
+import time
 
 def interpolate(A_entry, A_ball, t):
     return (1.0 - t) * A_entry + t * A_ball
@@ -16,7 +17,7 @@ def joint_states_callback(msg):
 
 if __name__ == "__main__":
     rospy.init_node('interpolation_publisher')
-    pub = rospy.Publisher('/goal_states', JointState, queue_size=10)
+    pub = rospy.Publisher('/goal_states', JointState, queue_size=1)
 
     # Subscribe to the /joint_states topic
     rospy.Subscriber('/joint_states', JointState, joint_states_callback)
@@ -28,7 +29,7 @@ if __name__ == "__main__":
     while current_joint_position is None and not rospy.is_shutdown():
         rospy.sleep(0.1)
 
-    rate = rospy.Rate(10)
+    rate = rospy.Rate(0.5)
 
     A_entry = np.array([[0.95663454, 0.28769805, 0.04560904, 0.283],
                         [0.23035644, -0.84302106, 0.486057, -0.208],
@@ -48,6 +49,7 @@ if __name__ == "__main__":
         joint_angles_msg = JointState()
         joint_angles_msg.position = final_joint_angles
 
+        time.sleep(10)
         pub.publish(joint_angles_msg)
         rate.sleep()
 
