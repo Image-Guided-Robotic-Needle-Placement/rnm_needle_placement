@@ -1,0 +1,8 @@
+prefix=/home/rnm-group2/group2/rnm_needle_placement/install
+
+Name: needle_placement
+Description: Description of needle_placement
+Version: 0.0.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 
