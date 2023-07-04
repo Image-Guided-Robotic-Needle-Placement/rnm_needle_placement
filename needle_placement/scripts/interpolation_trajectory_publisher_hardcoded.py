@@ -47,7 +47,7 @@ if __name__ == "__main__":
 
         joint_angles_msg = JointState()
         joint_angles_msg.position = final_joint_angles
-
+        
         time.sleep(10)
         pub.publish(joint_angles_msg)
         rate.sleep()
