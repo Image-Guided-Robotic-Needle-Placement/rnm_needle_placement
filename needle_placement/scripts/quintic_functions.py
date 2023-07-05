@@ -66,7 +66,6 @@ def acceleration(coefficients, t):
 
     #return np.array([c0,c1,c2,c3,c4,c5])
 
-
 def getJointTrajectoryCoefficients(q_init, q_final, t):
     """
     This function calculates joint trajectory using quintic polynomial
@@ -79,6 +78,7 @@ def getJointTrajectoryCoefficients(q_init, q_final, t):
     Returns: 
         The coefficients [c0,c1,c2,c3,c4,c5] for quintic trajectory
     """
+    
     # Coefficient Matrix
 
     A = np.array([[1, 0, 0, 0, 0, 0],
@@ -88,20 +88,22 @@ def getJointTrajectoryCoefficients(q_init, q_final, t):
                 [0, 1, 2*t, 3*(t**2), 4*(t**3), 5*(t**4)],
                 [0, 0, 2, 6*t, 12*(t**2), 20*(t**3)]])
 
-    #Constant vector [q0, v0, a0, qf, vf, af]
+    # Constant vector [q0, v0, a0, qf, vf, af]
     B = np.array([q_init, 0, 0, q_final, 0, 0])
-    
-    
+
     try:
         coefficients = np.linalg.solve(A, B)
-        np.set_printoptions(suppress=True,precision=4)
+        np.set_printoptions(suppress=True, precision=4)
 
         if np.abs(np.linalg.det(A)) < 1e-10:
             raise ValueError("The coefficient matrix is singular. Unable to solve the linear system.")
-            
+
         return coefficients
     except:
-       pass
+        return None
+
+
+
 
 def calculateJointTrajectory(q_init, q_final, t, num_points):
     """
@@ -194,6 +196,7 @@ def calculateSmoothRobotTrajectory(q_init_array, q_final_array, drawPlot):
     print("Desired joint positions: ", q_final_array)
 
     displacement = np.abs(np.array(q_final_array) - np.array(q_init_array))
+
     displacement = np.round(displacement,3)
     print("Joint displacements: ", displacement)
 
@@ -207,7 +210,8 @@ def calculateSmoothRobotTrajectory(q_init_array, q_final_array, drawPlot):
     print(f"least time = {np.max(displacement)}/2.175 = ",least_time)
 
     factor = 60
-    t = np.round(factor * least_time)  # t = duration = (factor * least_time)
+    t = np.round(factor * least_time)
+    #t = (factor * least_time)  # t = duration = (factor * least_time)
     print(f"t = round({factor}*{least_time}) : ",t)
 
     num_points = int(1000 * t)    # num_points = (1000 * duration), so that the points on the trajectory are all 1 ms apart
