@@ -7,7 +7,7 @@ import numpy as np
 import glob
 
 CHECKERBOARD = (8, 5)
-SQUARE_SIZE = 40  # mm
+SQUARE_SIZE = 0.04  # mm
 criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 1e5, 1e-5)
 obj_points = []  # 3D point in real world space
 img_points = []  # 2D points in image plane
@@ -15,7 +15,7 @@ img_points = []  # 2D points in image plane
 # Defining the world coordinates for 3D points
 objp = np.zeros((CHECKERBOARD[0] * CHECKERBOARD[1], 3), np.float32)
 objp[:, :2] = np.mgrid[0:CHECKERBOARD[0], 0:CHECKERBOARD[1]].T.reshape(-1, 2) * SQUARE_SIZE
-images = glob.glob('../../rosbag_images/*.png')
+images = sorted(glob.glob('../../rosbag_images/*.png'))
 
 for image in images:
     img = cv2.imread(image)
