@@ -22,10 +22,33 @@ import re
 
         return pcd'''
 
+def filter_pcd(pcd):
+    pcd.paint_uniform_color([0, 0, 1])
+    vis = o3d.visualization.VisualizerWithEditing()
+    vis.create_window()
+    vis.add_geometry(pcd)
+    vis.run()
+    vis.destroy_window()
 
+    picked_points = vis.get_picked_points()
+    scan_points = np.asarray(pcd.points)
+    radius = 5
+
+    pt_map = []
+    for point in picked_points:
+        camera_point = scan_points[point]
+        camera = [camera_point[0], camera_point[1], camera_point[2]]
+        test, pt_map_curr = pcd.hidden_point_removal(camera, radius)
+        time.sleep(2)
+        pt_map = pt_map + pt_map_curr
+
+    pcd_visible = pcd.select_by_index(list(set(pt_map)))
+    pcd_visible.paint_uniform_color([0, 0, 1])  # Blue points are visible points (to be kept).
+    o3d.visualization.draw_geometries([pcd_visible])
+    return pcd_visible
 def preprocess_point_cloud(pcd, voxel_size):
     pcd_down = pcd.voxel_down_sample(voxel_size)
-
+    # pcd_down = filter_pcd(pcd_down)
     radius_normal = voxel_size * 10
     pcd_down.estimate_normals(
         o3d.geometry.KDTreeSearchParamHybrid(radius=radius_normal, max_nn=100))
@@ -110,7 +133,6 @@ def refine_registration(source, target, voxel_size, trans):
     return res
 
 
-
 if __name__ == '__main__':
 
     voxel_size = 0.007
@@ -144,6 +166,7 @@ if __name__ == '__main__':
 
     # Stitch all pcds together after bringing them in the world coordinate system (robot-base)
     stitched_point_cloud = (pcds_down[0].transform(handeye_transformation)).transform(endeffector_transformations[0])
+
     stitched_copy_before = copy.deepcopy(stitched_point_cloud)
     stitched_copy_after = copy.deepcopy(stitched_point_cloud)
     for index, point_cloud in enumerate(pcds_down):
