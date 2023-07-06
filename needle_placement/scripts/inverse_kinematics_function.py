@@ -62,13 +62,14 @@ def inverse_kinematics(current_joint_position, A_final):
     # Compute the new joint angles using the incremental IK method
     q_final, _ = incremental_ik(q_current, A_current, A_final, A_lambdified, J_lambdified)
     q_final = q_final.flatten()
-    for q in q_final:
-        if q > 2*np.pi:
-            q = q - 2*np.pi
-        elif q < -2*np.pi:
-            q = q + 2*np.pi
-    print(q_final)
+    for i in range(len(q_final)):
+        while q_final[i] > np.pi:
+            q_final[i] -= 2*np.pi
+        while q_final[i] < -np.pi:
+            q_final[i] += 2*np.pi
+    #print(q_final)
     return q_final
+
 
 _=inverse_kinematics([0.0]*7, np.eye(4)[:3,:4].T.reshape(-1, 1))
 
@@ -81,7 +82,7 @@ if __name__ == "__main__":
     A_final = np.array([[0.95085546, 0.29124849, 0.10511047, 0.301],
                        [0.19840159, -0.83371212, 0.51532603, -0.139],
                        [0.2377198, -0.46914648, -0.85052388, 0.266]]).T.reshape(-1, 1)  # Add your desired pose here
-
+    #print(A_final)
     # Compute the final joint angles to reach the desired pose
     final_joint_angles = inverse_kinematics(current_joint_position, A_final)
 
