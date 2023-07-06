@@ -77,6 +77,8 @@ class TrajectoryPublisher:
             print('remaining messages in interpolated queue:', self.interpolated_message_queue.get_length())
             if next_message is not None:
                 trajectory = calculateSmoothRobotTrajectory(self.current_joint_states, next_message.position, False)
+                if trajectory is None:
+                    continue
                 concatenated_trajectory = np.vstack((concatenated_trajectory, trajectory)) #stacking individual trajectory
                 self.current_joint_states = next_message.position
 
@@ -119,7 +121,7 @@ class TrajectoryPublisher:
                 self.publish_interpolated_trajectory()
             else:
                 rospy.sleep(0.1)
-                rospy.loginfo("Waiting for goal message...")
+                #rospy.loginfo("Waiting for goal message...")
                 
 if __name__ == '__main__':
     trajectory_publisher = TrajectoryPublisher()
