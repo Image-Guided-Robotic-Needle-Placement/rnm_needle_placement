@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import numpy as np
 import rospy
 from quintic_functions import calculateSmoothRobotTrajectory
@@ -31,7 +33,7 @@ class InterpolationPublisher:
         while not rospy.is_shutdown() and self.current_joint_position is None:
             rospy.sleep(0.1)
 
-        for t in np.linspace(0, 1, 5):
+        for t in np.linspace(0, 1, 10):
             interpolated_pose = self.interpolate(self.A_entry, self.A_ball, t)
             print("Calculating inverse kinematics...")
             final_joint_angles = inverse_kinematics(self.current_joint_position, interpolated_pose)
