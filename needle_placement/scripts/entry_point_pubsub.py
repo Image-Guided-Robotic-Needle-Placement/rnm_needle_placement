@@ -19,7 +19,7 @@ def A_entry_callback(msg):
 
     
 if __name__ == "__main__":
-    rospy.init_node('entry_point_publisher')
+    rospy.init_node('entry_point_pubsub')
     pub = rospy.Publisher('/goal_states', JointState, queue_size=10)
 
     # Subscribe to the /joint_states topic
