@@ -17,10 +17,11 @@ def read_poses_from_npy(path):
 endeffector_poses_path = 'D:/xzFACULTATE/SoSe23/rnm/rnm_needle_placement-lab-final-fr/rnm_needle_placement-lab-final-fr/src/needle_placement/lab/endeffector_poses.npy'
 board_poses_path = 'D:/xzFACULTATE/SoSe23/rnm/rnm_needle_placement-lab-final-fr/rnm_needle_placement-lab-final-fr/src/needle_placement/lab/board_poses.npy'
 
-# Process each pose
+# Load poses from files
 endeffector_translations, endeffector_rotations = read_poses_from_npy(endeffector_poses_path)
 camera_translations, camera_rotations = read_poses_from_npy(board_poses_path)
 
+# Do the hand-eye calibration which finds the transformation camera -> end-effector
 handeye_rotation, handeye_translation = cv2.calibrateHandEye(endeffector_rotations, endeffector_translations, camera_rotations, camera_translations)
 
 print('Hand-eye calibration successful!\n\n')
