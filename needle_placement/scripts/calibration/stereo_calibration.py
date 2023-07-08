@@ -41,6 +41,7 @@ objp_depth[:, :2] = np.mgrid[0:CHECKERBOARD[0], 0:CHECKERBOARD[1]].T.reshape(-1,
 rgb_images = sorted(glob.glob('D:/xzFACULTATE/SoSe23/rnm/needle_placement/lab/rgb_images/*.png'))
 depth_images = sorted(glob.glob('D:/xzFACULTATE/SoSe23/rnm/needle_placement/lab/ir_images/*.png'))
 
+index = 0
 for rgb_image, depth_image in zip(rgb_images, depth_images):
 
     # Extract RGB image corners
@@ -63,7 +64,9 @@ for rgb_image, depth_image in zip(rgb_images, depth_images):
         corners_refined_depth = cv2.cornerSubPix(depth_image_gray, corners_depth, (16, 16), (-1, -1), criteria)
         img_points_depth.append(corners_refined_depth)
         depth_img = cv2.drawChessboardCorners(depth_img, CHECKERBOARD, corners_refined_depth, ret_depth)
-
+    else:
+        print(index)
+    index += 1
 
 ret_rgb, camera_matrix_rgb, dist_coeffs_rgb, rvecs_rgb, tvecs_rgb = \
     cv2.calibrateCamera(obj_points_rgb, img_points_rgb, rgb_image_gray.shape[::-1], None, None,
