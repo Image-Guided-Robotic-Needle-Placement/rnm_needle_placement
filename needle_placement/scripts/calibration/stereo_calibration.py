@@ -2,9 +2,29 @@ import cv2
 import numpy as np
 import glob
 
+def save_board_poses(obj_points, img_points, camera_matrix, dist_coeffs):
+    objpoints = np.array(obj_points)
+    imgpoints = np.array(img_points)
+    matrices = []
+
+    for i in range(len(objpoints)):
+        ret, rv, tv = cv2.solvePnP(objpoints[i], imgpoints[i], camera_matrix, dist_coeffs)
+        rv = cv2.Rodrigues(rv)[0]
+        rv = rv.reshape(9)
+        tv = tv.reshape(3)
+        matrix = np.array([[rv[0], rv[1], rv[2], tv[0]],
+                           [rv[3], rv[4], rv[5], tv[1]],
+                           [rv[6], rv[7], rv[8], tv[2]],
+                           [0, 0, 0, 1]])
+        matrices.append(matrix)
+
+    matrices = np.array(matrices)
+    np.save('D:/xzFACULTATE/SoSe23/rnm/needle_placement/lab/board_poses.npy', matrices)
+    return
+
 CHECKERBOARD = (8, 5)
-SQUARE_SIZE = 40  # mm
-criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 1e5, 1e-5)
+SQUARE_SIZE = 0.04  # m
+criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 100000, 1e-5)
 
 obj_points_rgb = []
 img_points_rgb = []
@@ -12,17 +32,14 @@ img_points_rgb = []
 obj_points_depth = []
 img_points_depth = []
 
-count1 = 0
-count2 = 0
-
 objp_rgb = np.zeros((CHECKERBOARD[0] * CHECKERBOARD[1], 3), np.float32)
 objp_rgb[:, :2] = np.mgrid[0:CHECKERBOARD[0], 0:CHECKERBOARD[1]].T.reshape(-1, 2) * SQUARE_SIZE
 
 objp_depth = np.zeros((CHECKERBOARD[0] * CHECKERBOARD[1], 3), np.float32)
 objp_depth[:, :2] = np.mgrid[0:CHECKERBOARD[0], 0:CHECKERBOARD[1]].T.reshape(-1, 2) * SQUARE_SIZE
 
-rgb_images = glob.glob('../../rosbag_images/*.png')
-depth_images = glob.glob('../../rosbag_images/depth_images/*.png')
+rgb_images = sorted(glob.glob('D:/xzFACULTATE/SoSe23/rnm/needle_placement/lab/rgb_images/*.png'))
+depth_images = sorted(glob.glob('D:/xzFACULTATE/SoSe23/rnm/needle_placement/lab/ir_images/*.png'))
 
 for rgb_image, depth_image in zip(rgb_images, depth_images):
 
@@ -54,6 +71,8 @@ ret_rgb, camera_matrix_rgb, dist_coeffs_rgb, rvecs_rgb, tvecs_rgb = \
 
 print("Camera Matrix RGB:\n", camera_matrix_rgb)
 
+save_board_poses(obj_points_rgb, img_points_rgb, camera_matrix_rgb, dist_coeffs_rgb)
+
 ret_depth, camera_matrix_depth, dist_coeffs_depth, rvecs_depth, tvecs_depth = \
     cv2.calibrateCamera(obj_points_depth, img_points_depth, depth_image_gray.shape[::-1], None, None,
                         flags=cv2.CALIB_RATIONAL_MODEL, criteria=criteria)
@@ -62,7 +81,7 @@ print("Camera Matrix Depth:\n", camera_matrix_depth)
 
 # Stereo calibration
 
-flag, stereoCameraMatrix1, stereoDistCoeffs1, stereoCameraMatrix2, stereoDistCoeffs2, R, T, E, F = \
+rms, stereoCameraMatrix1, stereoDistCoeffs1, stereoCameraMatrix2, stereoDistCoeffs2, R, T, E, F = \
     cv2.stereoCalibrate(obj_points_depth, img_points_rgb, img_points_depth, camera_matrix_rgb, dist_coeffs_rgb,
                         camera_matrix_depth, dist_coeffs_depth, rgb_image_gray.shape[::-1],
                         R=None, T=None, E=None, F=None, flags=cv2.CALIB_RATIONAL_MODEL, criteria=criteria)
