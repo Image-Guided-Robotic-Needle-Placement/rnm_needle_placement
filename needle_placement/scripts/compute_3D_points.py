@@ -1,9 +1,5 @@
 import copy
-
 import numpy as np
-
-def get_rotation_matrix(a, b):
-    return
 
 
 ball_point_scan = np.array([-0.0038827, -0.02626073, 0.03048087])
