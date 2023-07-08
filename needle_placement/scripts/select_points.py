@@ -1,8 +1,8 @@
 import numpy as np
 import open3d as o3d
 
-
-scan = o3d.io.read_point_cloud("scan_down.pcd")
+3
+scan = o3d.io.read_point_cloud("finalfinalfinal.pcd")
 # Visualize cloud and edit
 vis = o3d.visualization.VisualizerWithEditing()
 vis.create_window()
@@ -18,8 +18,10 @@ if len(picked_points) != 2:
 scan_points = np.asarray(scan.points)
 ball_point = scan_points[picked_points[0]]
 entry_point = scan_points[picked_points[1]]
-entry_point[2] += 150  # add height offset
+entry_point[2] += 0.15  # add height offset
 f = open("D:/xzFACULTATE/SoSe23/rnm/needle_placement/entry_ball_points_scan.txt", 'a')
 f.write(str(ball_point))
 f.write(str(entry_point))
 f.close()
+print(ball_point)
+print(entry_point)
