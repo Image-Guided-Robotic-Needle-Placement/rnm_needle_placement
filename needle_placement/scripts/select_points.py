@@ -1,15 +1,17 @@
 import numpy as np
 import open3d as o3d
 
-3
+# Load the down-sized scan
 scan = o3d.io.read_point_cloud("finalfinalfinal.pcd")
-# Visualize cloud and edit
+
+# Visualize cloud and select ball-point and entry-point in this order
 vis = o3d.visualization.VisualizerWithEditing()
 vis.create_window()
 vis.add_geometry(scan)
 vis.run()
 vis.destroy_window()
 
+# Picked points indices in the point cloud
 picked_points = vis.get_picked_points()
 
 if len(picked_points) != 2:
