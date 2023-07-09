@@ -3,9 +3,9 @@
 import rospy
 from sensor_msgs.msg import JointState
 
-def joint_state_publisher():
+def initial_position_publisher():
     # Initialize the node
-    rospy.init_node('joint_state_publisher')
+    rospy.init_node('initial_position_node')
 
     # Create a publisher
     # This will publish messages of type JointState to the /goal_states topic
@@ -33,6 +33,6 @@ def joint_state_publisher():
 
 if __name__ == '__main__':
     try:
-        joint_state_publisher()
+        initial_position_publisher()
     except rospy.ROSInterruptException:
         pass
