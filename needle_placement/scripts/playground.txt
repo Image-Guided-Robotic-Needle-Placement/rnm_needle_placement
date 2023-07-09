@@ -43,3 +43,15 @@ rostopic pub --once /A_ball std_msgs/Float64MultiArray "layout:
   data_offset: 0
 data: [0.95085546, 0.19840159, 0.2377198, 0.29124849, -0.83371212, -0.46914648, 0.10511047, 0.51532603, -0.85052388, 0.301, -0.139, 0.266]"
 
+Andrei
+
+rostopic pub --once /A_entry std_msgs/Float64MultiArray "layout:
+  dim:
+  - label: 'rows'
+    size: 3
+    stride: 4
+  - label: 'columns'
+    size: 4
+    stride: 1
+  data_offset: 0
+data: [0.95663454, 0.23035644, 0.17828703, 0.28769805, -0.84302106, -0.45447258, 0.04560904, 0.486057, -0.87273616, 0.40457072, -0.11591664, 0.07088274]"
