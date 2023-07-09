@@ -9,6 +9,7 @@ vis = o3d.visualization.VisualizerWithEditing()
 vis.create_window()
 vis.add_geometry(scan)
 vis.run()
+vis.get_cropped_geometry()
 vis.destroy_window()
 
 # Picked points indices in the point cloud

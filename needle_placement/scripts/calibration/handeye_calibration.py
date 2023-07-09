@@ -15,7 +15,7 @@ def read_poses_from_npy(path):
 
 
 endeffector_poses_path = 'D:/xzFACULTATE/SoSe23/rnm/rnm_needle_placement-lab-final-fr/rnm_needle_placement-lab-final-fr/src/needle_placement/lab/endeffector_poses.npy'
-board_poses_path = 'D:/xzFACULTATE/SoSe23/rnm/rnm_needle_placement-lab-final-fr/rnm_needle_placement-lab-final-fr/src/needle_placement/lab/board_poses.npy'
+board_poses_path = 'D:/xzFACULTATE/SoSe23/rnm/needle_placement/lab/board_poses.npy'
 
 # Load poses from files
 endeffector_translations, endeffector_rotations = read_poses_from_npy(endeffector_poses_path)

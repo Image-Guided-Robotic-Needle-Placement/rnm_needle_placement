@@ -53,7 +53,7 @@ def load_point_clouds(voxel_size=0.01):
     pcds_down = []
     pcds_fpfh = []
     for i in range(1, 3):
-        pcd = o3d.io.read_point_cloud("D:/xzFACULTATE/SoSe23/rnm/rnm_needle_placement-lab-final-fr/rnm_needle_placement-lab-final-fr/src/needle_placement/lab/pointclouds/scan%d.pcd" % i)
+        pcd = o3d.io.read_point_cloud("D:/xzFACULTATE/SoSe23/rnm/needle_placement/lab/pointclouds/cropped_%d.ply" % i)
         # pcd.estimate_normals(o3d.geometry.KDTreeSearchParamHybrid(radius= 10 * voxel_size, max_nn=30))
         pcd_down, pcd_fpfh = preprocess_point_cloud(pcd, voxel_size)
         pcds.append(pcd)
@@ -66,7 +66,8 @@ def load_point_clouds(voxel_size=0.01):
 def generating_pointcloud_from_stl(reference_path):
     reference_pointcloud_mesh = o3d.io.read_triangle_mesh(reference_path)
     reference_pointcloud = reference_pointcloud_mesh.sample_points_poisson_disk(50000)
-    reference_pointcloud.scale(0.00085, [0, 0, 0])
+    reference_pointcloud.scale(0.0009, [0, 0, 0])
+    o3d.io.write_point_cloud("finalfinalfinal.pcd", reference_pointcloud)
     # o3d.visualization.draw_geometries([reference_pointcloud])
     return reference_pointcloud
 
@@ -80,9 +81,12 @@ def prepare_dataset(voxel_size, reference_path, stitched_pcd):
     return source_down, target_down, source_fpfh, target_fpfh
 
 
-def execute_fast_global_registration(source_down, target_down, source_fpfh,
-                                     target_fpfh):
+def execute_fast_global_registration(source_down, target_down):
     distance_threshold = voxel_size * 0.5
+    source_fpfh = o3d.pipelines.registration.compute_fpfh_feature(
+        source_down, o3d.geometry.KDTreeSearchParamHybrid(radius= 10 * voxel_size, max_nn=100))
+    target_fpfh = o3d.pipelines.registration.compute_fpfh_feature(
+        target_down, o3d.geometry.KDTreeSearchParamHybrid(radius= 10 * voxel_size, max_nn=100))
     # result = o3d.pipelines.registration.registration_fast_based_on_feature_matching(
     #     source_down, target_down, source_fpfh, target_fpfh,
     #     o3d.pipelines.registration.FastGlobalRegistrationOption(
@@ -92,9 +96,12 @@ def execute_fast_global_registration(source_down, target_down, source_fpfh,
         source_down, target_down, source_fpfh, target_fpfh)
     return result
 
-def execute_global_registration(source_down, target_down, source_fpfh,
-                                     target_fpfh, voxel_size):
+def execute_global_registration(source_down, target_down, voxel_size):
 
+    source_fpfh = o3d.pipelines.registration.compute_fpfh_feature(
+        source_down, o3d.geometry.KDTreeSearchParamHybrid(radius= 10 * voxel_size, max_nn=100))
+    target_fpfh = o3d.pipelines.registration.compute_fpfh_feature(
+        target_down, o3d.geometry.KDTreeSearchParamHybrid(radius= 10 * voxel_size, max_nn=100))
     result = o3d.pipelines.registration.registration_ransac_based_on_feature_matching(
         source_down, target_down, source_fpfh, target_fpfh, True, 10000 * voxel_size,
         o3d.pipelines.registration.TransformationEstimationPointToPoint(False),
@@ -116,7 +123,7 @@ def refine_registration(source, target, voxel_size, trans):
 
 if __name__ == '__main__':
 
-    voxel_size = 0.007
+    voxel_size = 0.01
     reference_path = "C:/Users/Razvan/Downloads/Skeleton_Target.stl"
     pcds, pcds_down, pcds_fpfh = load_point_clouds(voxel_size=voxel_size)
     endeffector_transformations_inverse = []
@@ -127,46 +134,65 @@ if __name__ == '__main__':
 
     endeffector_transformations_inverse = np.array(endeffector_transformations_inverse)
 
-    handeye_transformation = np.array([[ 0.67808914, -0.04218229,   0.7337682, 0.05999226],
-                                       [-0.7349356 , -0.04984826,  0.67630231, 0.01110063],
-                                       [ 0.00804909, -0.99786562, -0.06480283, 0.04734731],
-                                       [0          , 0          , 0          , 1]])
+    handeye_transformation = np.array([[0.67808914, -0.04218229, 0.7337682, 0.05999226],
+                                       [-0.7349356, -0.04984826, 0.67630231, 0.01110063],
+                                       [0.00804909, -0.99786562, -0.06480283, 0.04734731],
+                                       [0, 0, 0, 1]])
 
     handeye_transformation_inverse = np.linalg.inv(handeye_transformation)
 
     # Stitch all pcds together after bringing them in the world coordinate system (robot-base)
-    stitched_point_cloud = (pcds_down[0].transform(handeye_transformation)).transform(endeffector_transformations[0])
+    stitched_point_cloud = (pcds_down[0].transform(handeye_transformation)).transform(endeffector_transformations_inverse[0])
     stitched_copy_before = copy.deepcopy(stitched_point_cloud)
     stitched_copy_after = copy.deepcopy(stitched_point_cloud)
+    # o3d.visualization.draw_geometries([stitched_copy_before])
     for index, point_cloud in enumerate(pcds_down):
 
         if index == 0:
             continue
 
         # Firstly, bring the current point-cloud in the world coordinate system
-        (point_cloud.transform(handeye_transformation)).transform(endeffector_transformations[index])
+        (point_cloud.transform(handeye_transformation)).transform(endeffector_transformations_inverse[index])
         stitched_copy_before += point_cloud
         o3d.visualization.draw_geometries([stitched_copy_before])
 
-        stiched_fpfh = o3d.pipelines.registration.compute_fpfh_feature(stitched_point_cloud,
-            o3d.geometry.KDTreeSearchParamHybrid(radius=voxel_size * 10, max_nn=100))
+        # o3d.visualization.draw_geometries([stitched_copy_after])
+        temp_registration = execute_fast_global_registration(point_cloud, stitched_point_cloud)
+        point_cloud.transform(temp_registration.transformation)
+        index_temp = 0
+        while temp_registration.fitness < 0.7 and index_temp < 5:
+            temp_registration = execute_fast_global_registration(point_cloud, stitched_point_cloud)
+            point_cloud.transform(temp_registration.transformation)
+            index_temp += 1
+
+        o3d.visualization.draw_geometries([stitched_copy_after])
 
         # Secondly, do an ICP refinement
-        result = refine_registration(point_cloud, stitched_point_cloud, voxel_size, np.eye(4))
+        result = refine_registration(point_cloud, stitched_point_cloud, voxel_size, temp_registration.transformation)
         stitched_point_cloud += point_cloud
         o3d.visualization.draw_geometries([stitched_point_cloud])
 
     stitched_down, scan_down, stitched_fpfh, scan_fpfh = prepare_dataset(voxel_size, reference_path, stitched_point_cloud)
+    o3d.io.write_point_cloud("final_stitched_down.pcd", stitched_down)
 
     # Global registration from the stitched point-cloud to the provided scan
-    model_registration_global = execute_global_registration(stitched_down, scan_down, stitched_fpfh, scan_fpfh, voxel_size)
-    # model_registration_global = execute_fast_global_registration(stitched_down, scan_down, stitched_fpfh, scan_fpfh)
+    # model_registration_global_first = execute_global_registration(stitched_down, scan_down, stitched_fpfh, scan_fpfh, voxel_size)
+    model_registration_global = execute_fast_global_registration(stitched_down, scan_down)
+    stitched_down.transform(model_registration_global.transformation)
+    index_global = 0
+    while model_registration_global.fitness < 0.7 and index_global < 5:
+        model_registration_global = execute_fast_global_registration(stitched_down, scan_down)
+        stitched_down.transform(model_registration_global.transformation)
+        index_global += 1
 
     # ICP refinement for better results
-    model_registration_refined = refine_registration(stitched_down, scan_down, voxel_size, model_registration_global.transformation)
+    model_registration_refined = refine_registration(stitched_down, scan_down, voxel_size, np.eye(4))
     o3d.visualization.draw_geometries([stitched_down])
     o3d.visualization.draw_geometries([scan_down])
+
+    print(model_registration_refined.transformation)
 
     # Stitch the stitched .pcd to the model for visualization
     scan_down += stitched_down.transform(model_registration_refined.transformation)
     o3d.visualization.draw_geometries([scan_down])
+
