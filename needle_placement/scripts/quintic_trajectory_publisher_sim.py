@@ -107,6 +107,7 @@ class TrajectoryPublisher:
             msg.data = trajectory_point.tolist()
             self.pub.publish(msg)
             rate.sleep()
+        print("Pose reached")
 
         #trajectory_done_msg = Bool()
         #trajectory_done_msg.data = True
