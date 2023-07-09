@@ -45,15 +45,17 @@ direction_vector_X = np.cross(direction_vector_Y, direction_vector_Z)
 needle_pose_ball = np.eye(4)
 needle_pose_entry = np.eye(4)
 
-needle_pose_entry[0:3, 0:3] = np.array([np.transpose(direction_vector_X), np.transpose(direction_vector_Y), np.transpose(direction_vector_Z)])
+needle_pose_entry[0:3, 0:3] = np.array([direction_vector_X, direction_vector_Y, direction_vector_Z])
+needle_pose_entry[0:3, 0:3] = np.transpose(needle_pose_entry[0:3, 0:3])
 needle_pose_entry[0:3, 3] = entry_point_global[0:3]
 
-needle_pose_ball[0:3, 0:3] = np.array([np.transpose(direction_vector_X), np.transpose(direction_vector_Y), np.transpose(direction_vector_Z)])
+needle_pose_ball[0:3, 0:3] = np.array([direction_vector_X, direction_vector_Y, direction_vector_Z])
+needle_pose_ball[0:3, 0:3] = np.transpose(needle_pose_ball[0:3, 0:3])
 needle_pose_ball[0:3, 3] = ball_point_global[0:3]
 
 # Compute the end-effector poses
-ee_pose_entry = np.matmul(needle_to_ee, needle_pose_entry)
-ee_pose_ball = np.matmul(needle_to_ee, needle_pose_ball)
+ee_pose_entry = np.matmul(ee_to_needle, needle_pose_entry)
+ee_pose_ball = np.matmul(ee_to_needle, needle_pose_ball)
 
 print("EE entry pose:", ee_pose_entry)
 print("EE ball pose:", ee_pose_ball)
