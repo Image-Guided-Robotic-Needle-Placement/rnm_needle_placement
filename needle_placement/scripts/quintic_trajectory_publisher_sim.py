@@ -6,6 +6,7 @@ from sensor_msgs.msg import JointState
 import numpy as np
 from quintic_functions import calculateSmoothRobotTrajectory
 from queue import Queue
+import time
 
 class MessageQueue:
     def __init__(self):
@@ -106,6 +107,7 @@ class TrajectoryPublisher:
             rate.sleep()
 
         print("Pose reached")
+        time.sleep(2)
         reached_msg = Bool()
         reached_msg.data = True
         self.reached_pub.publish(reached_msg)

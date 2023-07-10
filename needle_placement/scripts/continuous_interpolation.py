@@ -6,6 +6,7 @@ from std_msgs.msg import Float64MultiArray, Bool
 from quintic_functions import calculateSmoothRobotTrajectory
 from inverse_kinematics_function import inverse_kinematics
 from sensor_msgs.msg import JointState
+import time
 
 class InterpolationPublisher:
     def __init__(self):
@@ -46,6 +47,8 @@ class InterpolationPublisher:
         while not rospy.is_shutdown() and (self.current_joint_position is None or self.A_entry is None or self.A_ball is None or self.reached is False):
             rospy.sleep(0.1)
 
+        time.sleep(2)
+        
         for t in np.linspace(0, 1, 10):
             interpolated_pose = self.interpolate(self.A_entry, self.A_ball, t)
             print("Calculating inverse kinematics...")
