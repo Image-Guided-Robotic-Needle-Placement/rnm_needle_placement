@@ -52,8 +52,8 @@ def load_point_clouds(voxel_size=0.01):
     pcds = []
     pcds_down = []
     pcds_fpfh = []
-    for i in range(1, 3):
-        pcd = o3d.io.read_point_cloud("D:/xzFACULTATE/SoSe23/rnm/needle_placement/lab/pointclouds/cropped_%d.ply" % i)
+    for i in range(0, 3):
+        pcd = o3d.io.read_point_cloud("/home/rnm-group2/group2/rnm_needle_placement/src/needle_placement/cropped_%d.ply" % i)
         # pcd.estimate_normals(o3d.geometry.KDTreeSearchParamHybrid(radius= 10 * voxel_size, max_nn=30))
         pcd_down, pcd_fpfh = preprocess_point_cloud(pcd, voxel_size)
         pcds.append(pcd)
@@ -123,11 +123,11 @@ def refine_registration(source, target, voxel_size, trans):
 
 if __name__ == '__main__':
 
-    voxel_size = 0.01
-    reference_path = "C:/Users/Razvan/Downloads/Skeleton_Target.stl"
+    voxel_size = 0.008
+    reference_path = "/home/rnm-group2/Downloads/Skeleton_Target.stl"
     pcds, pcds_down, pcds_fpfh = load_point_clouds(voxel_size=voxel_size)
     endeffector_transformations_inverse = []
-    endeffector_transformations = np.load("D:/xzFACULTATE/SoSe23/rnm/rnm_needle_placement-lab-final-fr/rnm_needle_placement-lab-final-fr/src/needle_placement/scripts/new_poses.npy")
+    endeffector_transformations = np.load("/home/rnm-group2/group2/rnm_needle_placement/src/needle_placement/lab/pointclouds/lab1_poses.npy")
 
     for transformation in endeffector_transformations:
         endeffector_transformations_inverse.append(np.linalg.inv(transformation))
@@ -158,14 +158,16 @@ if __name__ == '__main__':
 
         # o3d.visualization.draw_geometries([stitched_copy_after])
         temp_registration = execute_fast_global_registration(point_cloud, stitched_point_cloud)
+        temp_fitness = temp_registration.fitness
         point_cloud.transform(temp_registration.transformation)
         index_temp = 0
         while temp_registration.fitness < 0.7 and index_temp < 5:
             temp_registration = execute_fast_global_registration(point_cloud, stitched_point_cloud)
-            point_cloud.transform(temp_registration.transformation)
+            if temp_registration.fitness > temp_fitness:
+                point_cloud.transform(temp_registration.transformation)
+                temp_fitness = temp_registration.fitness
             index_temp += 1
 
-        o3d.visualization.draw_geometries([stitched_copy_after])
 
         # Secondly, do an ICP refinement
         result = refine_registration(point_cloud, stitched_point_cloud, voxel_size, temp_registration.transformation)
@@ -179,10 +181,13 @@ if __name__ == '__main__':
     # model_registration_global_first = execute_global_registration(stitched_down, scan_down, stitched_fpfh, scan_fpfh, voxel_size)
     model_registration_global = execute_fast_global_registration(stitched_down, scan_down)
     stitched_down.transform(model_registration_global.transformation)
+    global_fitness = model_registration_global.fitness
     index_global = 0
     while model_registration_global.fitness < 0.7 and index_global < 5:
         model_registration_global = execute_fast_global_registration(stitched_down, scan_down)
-        stitched_down.transform(model_registration_global.transformation)
+        if model_registration_global.fitness > global_fitness:
+            stitched_down.transform(model_registration_global.transformation)
+            global_fitness = model_registration_global.fitness
         index_global += 1
 
     # ICP refinement for better results
