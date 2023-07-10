@@ -13,16 +13,12 @@ handeye_transformation = np.array([[0.67808914, -0.04218229,   0.7337682, 0.0599
                                    [0.00804909, -0.99786562, -0.06480283, 0.04734731],
                                    [0, 0, 0, 1]])'''
 
-# Registration our model -> provided model
-registration_transformation = np.array([[0.97357072, 0.06615187, 0.2185955, -0.05430584],
-                                        [-0.10727924, 0.97742813, 0.18200387, -0.07463921],
-                                        [-0.2016215, -0.20064439, 0.95869213, 0.01551392],
+# Registration provided model -> our model
+registration_transformation = np.array([[0.94899234, -0.06606545, -0.30830002, 0.34693045],
+                                        [0.12865134, 0.97383691, 0.18732458, -0.09952967],
+                                        [0.28785826, -0.2174328,  0.93266318, 0.05944911],
                                         [0, 0, 0, 1]])
 
-# registration_transformation = np.array([[-0.99489023, 0.04674186, -0.08949089, 0.3272532],
-#                                         [0.03655126, 0.99300135, 0.11230456, 0.05077119],
-#                                         [0.0941139,  0.10845971, -0.98963582,  0.01296628],
-#                                         [0, 0, 0, 1]])
 
 # Registration provided model -> our model
 registration_transformation_inverse = np.linalg.inv(registration_transformation)
@@ -36,8 +32,8 @@ needle_to_ee = np.linalg.inv(ee_to_needle)
 
 # Ball- and entry-points in the global coordinate system
 # CS: global
-ball_point_global = np.matmul(registration_transformation_inverse, ball_point_scan_homogeneous)
-entry_point_global = np.matmul(registration_transformation_inverse, entry_point_scan_homogeneous)
+ball_point_global = np.matmul(registration_transformation, ball_point_scan_homogeneous)
+entry_point_global = np.matmul(registration_transformation, entry_point_scan_homogeneous)
 
 # entry_point_global = np.matmul(needle_to_ee, entry_point_global)
 # ball_point_global = np.matmul(needle_to_ee, ball_point_global)
@@ -49,8 +45,8 @@ direction_vector_Z = direction_vector_Z[0:3]
 direction_vector_Z = direction_vector_Z / np.linalg.norm(direction_vector_Z)
 
 # Direction vector Y
-direction_vector_Y = copy.deepcopy(direction_vector_Z)
-direction_vector_Y[1] = -direction_vector_Y[1]
+direction_vector_Y = np.array([1, 1, -(direction_vector_Z[0] + direction_vector_Z[1])/direction_vector_Z[2]])
+direction_vector_Y = direction_vector_Y / np.linalg.norm(direction_vector_Y)
 
 # Direction vector X
 direction_vector_X = np.cross(direction_vector_Y, direction_vector_Z)
