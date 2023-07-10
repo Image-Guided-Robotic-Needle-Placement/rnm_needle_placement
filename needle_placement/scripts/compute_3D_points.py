@@ -5,7 +5,7 @@ import numpy as np
 # Hard-coded values of ball- and entry-point in the provided scan obtained from select_points.py
 # CS: local scan CS
 ball_point_scan_homogeneous = np.array([-0.00445699, -0.02528321, 0.02605761, 1])
-entry_point_scan_homogeneous = np.array([-0.03418263, -0.18129, 0.34387507, 1])
+entry_point_scan_homogeneous = np.array([-0.03418263, -0.18129, 0.24387507, 1])
 
 ''' #  We don't neeed it, because the registration already brings the scan in the world coordinate system
 handeye_transformation = np.array([[0.67808914, -0.04218229,   0.7337682, 0.05999226],
@@ -45,7 +45,7 @@ direction_vector_Z = direction_vector_Z[0:3]
 direction_vector_Z = direction_vector_Z / np.linalg.norm(direction_vector_Z)
 
 # Direction vector Y
-direction_vector_Y = np.array([1, 1, -(direction_vector_Z[0] + direction_vector_Z[1])/direction_vector_Z[2]])
+direction_vector_Y = np.array([0.28769805,  -0.84302106, -(0.28769805 * direction_vector_Z[0] - 0.84302106 * direction_vector_Z[1])/direction_vector_Z[2]])
 direction_vector_Y = direction_vector_Y / np.linalg.norm(direction_vector_Y)
 
 # Direction vector X
