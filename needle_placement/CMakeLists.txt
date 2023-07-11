@@ -165,6 +165,9 @@ catkin_install_python(PROGRAMS
   scripts/inverse_kinematics.py
   scripts/quintic_trajectory_publisher.py
   script/quintic_trajectory_publisher_sim.py
+  scripts/model_registration_node_for_integration.py
+  scripts/saving_pcd_jointstates.py
+  scripts/predefined_jointstates.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 

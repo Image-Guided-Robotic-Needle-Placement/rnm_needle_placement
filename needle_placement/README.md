@@ -1,50 +1,20 @@
-**To run the code from this directory**
-
-```ros
-$ cd catkin_ws/src
-$ git clone git@github.com:Image-Guided-Robotic-Needle-Placement/rnm_needle_placement.git
-$ cd rnm_needle_placement && git checkout selva
-```
-**To make it in ros package structure**
-
-```ros
-$ mv needle_placement ../
-$ mv README.md ../ && cd ..
-$ rm -rf rnm_needle_placement
-```
-
-**Building the package**
-
-- Make sure you are in `$ catkin_ws/src`
-
-```ros
-catkin_make
-```
-
-**To run the node**
+## Summary
 
 
-**Testing the forward kinematics node**
+- **complete_run.sh** - bash script that calls the respective launch files and ros nodes to perform the model recording and registration in sequence.
+- Once the entry points and ball points are selected by registration, then it is published over the topic 'A_final' & 'A_ball'
 
-```ros
-rosrun needle_placement forward_kinematics.py
-```
+## How it does?
 
-- `/end_effector_pose` is the topic that publishes the direct kinematics result
-- `/tf` publishes the transformation matrix from `base_link` to `end_effector`
+- Launches the `auto_pcd_recorder.launch` which executes two nodes, 
 
-```ros
-rostopic echo /end_effector_pose 
-```
-and (from the project description)
-```ros
-rosrun tf tf_echo panda_link0 panda_link8
-```
 
-**Testing the inverse kinematics node**
+	- `quintic_trajectory_publisher_sim.py` - performs quintic trajectory
+	- `saving_pcd_jointstates.py` - records the point cloud data and saves it in the specified directory
 
-```ros
-rosrun needle_placement inverse_kinematics.py
-```
+- And, once the model recording is done which we check by getting the rosparam `model_recording_done` as  true, then 
+- We execute the  `model_registration_node_for_integration.py` which performs the model registration and publishes entry and ball poses over the topics `A_entry` & `A_ball` respectively.
+		      
+
 
 
