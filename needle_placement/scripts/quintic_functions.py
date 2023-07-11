@@ -1,3 +1,7 @@
+"""
+Author: David Sosa Gomez and Manav Thakkar
+"""
+
 import numpy as np
 import matplotlib.pyplot as plt
 import sys
@@ -55,16 +59,6 @@ def acceleration(coefficients, t):
     acceleration = np.dot(coefficients,time)
     return acceleration
 
-
-#def getJointTrajectoryCoefficients(q_init, q_final, t):
-    #c0 = q_init
-    #c1 = 0
-    #c2 = 0
-    #c3 = (10/(t**3)) * (q_final - q_init)
-    #c4 = (-15/(t**4)) * (q_final - q_init)
-    #c5 = (6/(t**5)) * (q_final - q_init)
-
-    #return np.array([c0,c1,c2,c3,c4,c5])
 
 def getJointTrajectoryCoefficients(q_init, q_final, t):
     """

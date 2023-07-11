@@ -1,3 +1,5 @@
+<!-- Author: David Sosa Gomez and Manav Thakkar -->
+
 <?xml version="1.0" ?>
 <launch>
 <node pkg="needle_placement" type="quintic_trajectory_publisher_sim.py" name="quintic_trajectory_publisher_sim" output="screen"/>

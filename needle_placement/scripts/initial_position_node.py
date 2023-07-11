@@ -1,5 +1,11 @@
 #!/usr/bin/env python3
 
+"""
+Author: David Sosa Gomez, Manav Thakkar and Omar Draidrya
+
+This node is used to publish the initial position of the robot to the /goal_states.
+"""
+
 import rospy
 from sensor_msgs.msg import JointState
 
@@ -7,9 +13,6 @@ def initial_position_publisher():
     # Initialize the node
     rospy.init_node('initial_position_node')
 
-    # Create a publisher
-    # This will publish messages of type JointState to the /goal_states topic
-    # The queue_size parameter limits the amount of queued messages if any subscriber is not receiving them fast enough
     pub = rospy.Publisher('/goal_states', JointState, queue_size=10)
 
     # Define joint names for Panda robot
@@ -23,7 +26,6 @@ def initial_position_publisher():
     msg.name = joint_names
     msg.position = joint_positions
 
-    # Sleep to ensure the publisher is set up before we start publishing.
     rospy.sleep(1)
 
     # Publish the message once

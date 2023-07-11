@@ -1,5 +1,12 @@
 #!/usr/bin/env python3
 
+"""
+Author: David Sosa Gomez and Manav Thakkar
+
+This node takes /A_entry , uses the inverse kinematics function to calculate the joint angles and publishes them to /goal_states.
+With this node the robot moves to the entry point.
+"""
+
 import rospy
 import numpy as np
 from sensor_msgs.msg import JointState
@@ -40,8 +47,9 @@ if __name__ == "__main__":
 
     print("calculating inverse kinematics...")
     final_joint_angles = inverse_kinematics(current_joint_position, A_entry)
-    #print(final_joint_angles)
     print("done calculating inverse kinematics")
+
+    # Update the current joint position with the newly calculated final joint angles
     current_joint_position = final_joint_angles.tolist()
 
     joint_angles_msg = JointState()
@@ -51,4 +59,5 @@ if __name__ == "__main__":
     print("published joint angles", joint_angles_msg.position)
     rate.sleep()
     
-    rospy.signal_shutdown('Finished publishing all angles')  # Shutdown the node
+    # Shutdown the node
+    rospy.signal_shutdown('Finished publishing all angles')  

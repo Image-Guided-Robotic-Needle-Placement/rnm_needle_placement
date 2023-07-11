@@ -1,5 +1,11 @@
 #!/usr/bin/env python3
 
+"""
+Author: David Sosa Gomez, Manav Thakkar and Selva Nachimuthu
+
+This is the main script that communicates with the other nodes and publishes the angles to the robot.
+"""
+
 import rospy
 from std_msgs.msg import Float64MultiArray, Bool
 from sensor_msgs.msg import JointState
@@ -56,6 +62,7 @@ class TrajectoryPublisher:
         self.desired_joint_states = msg.position
         print("Message queue length (goal state):", self.goal_message_queue.get_length())
 
+    # Publish the trajectory after waiting for current and desired joint states to be available
     def publish_trajectory(self):
         while self.current_joint_states is None or self.desired_joint_states is None:
             rospy.sleep(0.1)
@@ -63,12 +70,14 @@ class TrajectoryPublisher:
         if next_message is not None:
             self.calculate_trajectory(next_message)
 
+    # Publish interpolated trajectory if both current joint states and interpolated joint states are available
     def publish_interpolated_trajectory(self):
         while self.current_joint_states is None or self.interpolated_joint_states is None:   
             rospy.sleep(0.1) 
 
         concatenated_trajectory = np.empty((0, len(self.current_joint_states))) 
         
+        # Continue dequeuing and processing interpolated trajectory points until queue is empty
         while self.interpolated_message_queue.get_length() > 0:  
             next_message = self.interpolated_message_queue.dequeue()
             print('remaining messages in interpolated queue:', self.interpolated_message_queue.get_length())
@@ -88,9 +97,6 @@ class TrajectoryPublisher:
             self.pub.publish(msg)
             rate.sleep()
 
-        reached_msg = Bool()
-        reached_msg.data = True
-        self.reached_pub.publish(reached_msg)
 
     def calculate_trajectory(self, msg):
         self.desired_joint_states = msg.position
@@ -108,6 +114,8 @@ class TrajectoryPublisher:
 
         print("Pose reached")
         time.sleep(2)
+
+        # Publish True to /reached topic to indicate that the needle is at entry point
         reached_msg = Bool()
         reached_msg.data = True
         self.reached_pub.publish(reached_msg)
