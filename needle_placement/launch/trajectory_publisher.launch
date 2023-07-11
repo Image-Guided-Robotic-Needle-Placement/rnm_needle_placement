@@ -1,0 +1,9 @@
+<!-- Author: David Sosa Gomez and Manav Thakkar -->
+
+<?xml version="1.0" ?>
+<launch>
+<node pkg="needle_placement" type="quintic_trajectory_publisher_sim.py" name="quintic_trajectory_publisher_sim" output="screen"/>
+<node pkg="needle_placement" type="initial_position_node.py" name="initial_position_node" output="screen"/>
+<node pkg="needle_placement" type="entry_point_pubsub.py" name="entry_point_pubsub" output="screen"/>
+<node pkg="needle_placement" type="continuous_interpolation.py" name="interpolation_publisher" output="screen"/>
+</launch>

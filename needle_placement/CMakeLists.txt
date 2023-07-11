@@ -163,6 +163,9 @@ include_directories(
 catkin_install_python(PROGRAMS
   scripts/forward_kinematics.py
   scripts/inverse_kinematics.py
+  scripts/quitic_trajectory_publisher.py
+  scripts/interpolation_trajectory_publisher_hardcoded.py
+  script/quintic_trajectory_publisher_sim.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
