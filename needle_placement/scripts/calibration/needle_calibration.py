@@ -76,6 +76,14 @@ for i in range(len(positions)):
 centroid_translations_ee = np.matrix(centroid_translations_ee)
 centroid_mean_translation_ee = centroid_translations_ee.mean(0)
 
+rmse = 0
+# Compute the average translation from end-effector to needle-tip
+for i in range(len(positions)):
+    error_vec = centroid_mean_translation_ee - centroid_translations_ee[i]
+    rmse += np.linalg.norm(error_vec)**2
+
 # Print the calibrated tip position
 print("Calibrated Tip Position:")
 print(centroid_mean_translation_ee)
+print("RMSE:")
+print(np.sqrt(rmse / (3 * len(positions))))

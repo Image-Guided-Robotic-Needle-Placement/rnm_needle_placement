@@ -25,9 +25,10 @@ def compute_calibration_rmse(endeffector_poses, camera_poses, handeye_transform)
 
     for end_pose, cam_pose in zip(endeffector_poses, camera_poses):
         board_pose_translational_error = board_pose_mean[0:3, 3] - np.matmul(end_pose, np.matmul(handeye_transform, cam_pose))[0:3, 3]
-        rmse += np.linalg.norm(board_pose_translational_error)
+        rmse += np.linalg.norm(board_pose_translational_error)**2
 
     return np.sqrt(rmse / (3 * len(endeffector_poses)))
+
 
 endeffector_poses_path = 'D:/xzFACULTATE/SoSe23/rnm/rnm_needle_placement-lab-final-fr/rnm_needle_placement-lab-final-fr/src/needle_placement/lab/endeffector_poses.npy'
 board_poses_path = 'D:/xzFACULTATE/SoSe23/rnm/needle_placement/lab/board_poses.npy'
