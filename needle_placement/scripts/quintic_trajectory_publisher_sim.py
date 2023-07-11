@@ -43,6 +43,8 @@ class TrajectoryPublisher:
         #publishers
         self.pub = rospy.Publisher('/joint_position_example_controller_sim/joint_command', Float64MultiArray, queue_size=10)
         self.reached_pub = rospy.Publisher('/reached', Bool, queue_size=1)
+        self.trajectory_done_pub = rospy.Publisher('/trajectory_done', Bool, queue_size=1)
+        self.is_trajectory_done = False
 
         #subscribers
         rospy.Subscriber('/joint_states', JointState, self.joint_states_callback)
@@ -114,6 +116,8 @@ class TrajectoryPublisher:
 
         print("Pose reached")
         time.sleep(2)
+        self.is_trajectory_done = True
+        print('Trajectory completed')
 
         # Publish True to /reached topic to indicate that the needle is at entry point
         reached_msg = Bool()
@@ -122,6 +126,12 @@ class TrajectoryPublisher:
 
     def run(self):
         while not rospy.is_shutdown():
+            if self.is_trajectory_done:
+                trajectory_done_msg = Bool()
+                trajectory_done_msg.data = True
+                self.trajectory_done_pub.publish(trajectory_done_msg)
+                rospy.sleep(1)
+                self.is_trajectory_done = False
             if self.goal_message_queue.get_length() > 0:
                 self.publish_trajectory()
             elif self.interpolated_message_queue.get_length() > 0 and self.goal_message_queue.get_length() == 0: 

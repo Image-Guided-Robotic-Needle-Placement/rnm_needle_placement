@@ -1,0 +1,7 @@
+<!-- Author: Selvakumar nachimuthu -->
+
+<?xml version="1.0" ?>
+<launch>
+  <node pkg="needle_placement" type="quintic_trajectory_publisher_sim.py" name='trajectory_publisher_node' output='screen'/>
+  <node pkg="needle_placement" type="saving_pcd_jointstates.py" name='pcd_saver_node' output='screen'/>
+</launch>
