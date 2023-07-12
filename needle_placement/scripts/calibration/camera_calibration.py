@@ -5,7 +5,7 @@
 '''
 Authors: Selvakumar Nachimuthu
 Attention: obsolete! This calibration was adapted and integrated in stereo_calibration.py, where the 2 cameras are first 
-calibrated (intrinsics) and then to each other (extrinsics/stereo)
+individually calibrated (intrinsics) and then to each other (extrinsics/stereo)
 '''
 
 import cv2
