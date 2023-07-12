@@ -1,7 +1,3 @@
-"""
-Author: David Sosa Gomez, Manav Thakkar and Selva Nachimuthu
-"""
-
 import numpy as np
 from sympy import symbols, Matrix, cos, sin, pi, eye
 from numba import jit
