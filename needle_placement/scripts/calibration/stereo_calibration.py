@@ -1,5 +1,5 @@
 '''
-Authors: Razvan-Andrei Draghici, Selvakumar Nachimuthu
+Authors: Selvakumar Nachimuthu and Razvan-Andrei Draghici
 '''
 
 

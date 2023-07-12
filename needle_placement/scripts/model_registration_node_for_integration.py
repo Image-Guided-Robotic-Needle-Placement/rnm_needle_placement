@@ -15,7 +15,6 @@ from std_msgs.msg import Float64MultiArray, MultiArrayDimension
 # Sample the .pcd down and compute its features
 def preprocess_point_cloud(pcd, voxel_size):
     pcd_down = pcd.voxel_down_sample(voxel_size)
-    # pcd_down = filter_pcd(pcd_down)
     radius_normal = voxel_size * 10
     pcd_down.estimate_normals(
         o3d.geometry.KDTreeSearchParamHybrid(radius=radius_normal, max_nn=100))
@@ -33,6 +32,8 @@ def load_point_clouds(voxel_size=0.01):
     pcds_fpfh = []
     for i in range(1, 3):
         pcd = o3d.io.read_point_cloud("/home/selva/Desktop/presentation/pointclouds/pointcloud%d.pcd" % i)
+
+        ###  Manually filter the points clouds and save them as .ply's
         pcd.paint_uniform_color([0, 0, 1])
         vis = o3d.visualization.VisualizerWithEditing()
         vis.create_window()
@@ -40,6 +41,8 @@ def load_point_clouds(voxel_size=0.01):
         vis.run()
         vis.destroy_window()
         pcd = o3d.io.read_point_cloud("/home/selva/Desktop/presentation/pointclouds/cropped_%d.ply" % i)
+        ###
+
         # pcd.estimate_normals(o3d.geometry.KDTreeSearchParamHybrid(radius= 10 * voxel_size, max_nn=30))
         pcd_down, pcd_fpfh = preprocess_point_cloud(pcd, voxel_size)
         pcds.append(pcd)
@@ -52,8 +55,7 @@ def load_point_clouds(voxel_size=0.01):
 def generating_pointcloud_from_stl(reference_path):
     reference_pointcloud_mesh = o3d.io.read_triangle_mesh(reference_path)
     reference_pointcloud = reference_pointcloud_mesh.sample_points_poisson_disk(50000)
-    reference_pointcloud.scale(0.00095, [0, 0, 0])
-    # o3d.visualization.draw_geometries([reference_pointcloud])
+    reference_pointcloud.scale(0.00095, [0, 0, 0])  # scale the .stl point-cloud such that it matches our scanned .pcds
     return reference_pointcloud
 
 
@@ -92,7 +94,7 @@ def execute_global_registration(source_down, target_down, voxel_size):
         o3d.pipelines.registration.TransformationEstimationPointToPoint(False),
         3, [
             o3d.pipelines.registration.CorrespondenceCheckerBasedOnEdgeLength(
-                0.9),  # https://github.com/isl-org/Open3D/issues/2119
+                0.9),
             o3d.pipelines.registration.CorrespondenceCheckerBasedOnDistance(
                 10000 * voxel_size)
         ], o3d.pipelines.registration.RANSACConvergenceCriteria(1000000, 0.99))
@@ -118,15 +120,9 @@ def compute_ball_points(ball_point, entry_point):
     # Registration provided model -> our model
     registration_transformation = np.array(final_transform)
 
-    # Registration provided model -> our model
-    registration_transformation_inverse = np.linalg.inv(registration_transformation)
-
     #  Transformation end-effector -> need-tip
-    ee_to_needle = np.eye(4)
-    ee_to_needle[0:3, 3] = [-0.00156939339, 0.00076773158, 0.19702979428]
-
-    # Transformation needle-tip -> end-effector
-    needle_to_ee = np.linalg.inv(ee_to_needle)
+    needle_to_ee = np.eye(4)
+    needle_to_ee[0:3, 3] = [-0.00156939339, 0.00076773158, 0.19702979428]
 
     # Ball- and entry-points in the global coordinate system
     # CS: global
@@ -139,6 +135,10 @@ def compute_ball_points(ball_point, entry_point):
     direction_vector_Z = direction_vector_Z[0:3]
     direction_vector_Z = direction_vector_Z / np.linalg.norm(direction_vector_Z)
 
+    # RX and RY are not uniquely determined by the needle.
+    # To avoid collisions, we used values from a known, collision-free orientation of the robot.
+    # Of course, the orientations have to be orthogonal to each other, so we only use little information from the
+    # collision-free pose.
     # Direction vector Y
     direction_vector_Y = np.array([0.28769805,  -0.84302106, -(0.28769805 * direction_vector_Z[0] - 0.84302106 * direction_vector_Z[1])/direction_vector_Z[2]])
     direction_vector_Y = direction_vector_Y / np.linalg.norm(direction_vector_Y)
@@ -158,8 +158,8 @@ def compute_ball_points(ball_point, entry_point):
     needle_pose_ball[0:3, 3] = ball_point_global[0:3]
 
     # Compute the end-effector poses
-    ee_pose_entry = np.matmul(ee_to_needle, needle_pose_entry)
-    ee_pose_ball = np.matmul(ee_to_needle, needle_pose_ball)
+    ee_pose_entry = np.matmul(needle_to_ee, needle_pose_entry)
+    ee_pose_ball = np.matmul(needle_to_ee, needle_pose_ball)
 
     print("EE entry pose:", ee_pose_entry)
     print("EE ball pose:", ee_pose_ball)
@@ -182,15 +182,15 @@ if __name__ == "__main__":
     endeffector_transformations = np.load("/home/selva/Desktop/presentation/pointclouds/lab1_poses.npy")
     print("endeffector_transformations", endeffector_transformations)
     handeye_transformation = np.array([[0.67808914, -0.04218229, 0.7337682, 0.05999226],
-                                        [-0.7349356, -0.04984826, 0.67630231, 0.01110063],
-                                        [0.00804909, -0.99786562, -0.06480283, 0.04734731],
-                                        [0, 0, 0, 1]])
+                                       [-0.7349356, -0.04984826, 0.67630231, 0.01110063],
+                                       [0.00804909, -0.99786562, -0.06480283, 0.04734731],
+                                       [0, 0, 0, 1]])
 
     # Stitch all pcds together after bringing them in the world coordinate system (robot-base)
     stitched_point_cloud = (pcds_down[0].transform(handeye_transformation)).transform(endeffector_transformations[0])
     stitched_copy_before = copy.deepcopy(stitched_point_cloud)
     stitched_copy_after = copy.deepcopy(stitched_point_cloud)
-    # o3d.visualization.draw_geometries([stitched_copy_before])
+
     for index, point_cloud in enumerate(pcds_down):
 
         if index == 0:
@@ -201,7 +201,7 @@ if __name__ == "__main__":
         stitched_copy_before += point_cloud
         o3d.visualization.draw_geometries([stitched_copy_before])
 
-        # o3d.visualization.draw_geometries([stitched_copy_after])
+        # Secondly, register the current pcd to the stitched pcd if the calibrations are not accurate
         temp_registration = execute_fast_global_registration(point_cloud, stitched_point_cloud)
         temp_fitness = temp_registration.fitness
         point_cloud.transform(temp_registration.transformation)
@@ -213,7 +213,7 @@ if __name__ == "__main__":
                 temp_fitness = temp_registration.fitness
             index_temp += 1
 
-        # result = refine_registration(point_cloud, stitched_point_cloud, voxel_size, np.eye(4))
+        # Thirdly, refine the stitching using ICP
         result = refine_registration(point_cloud, stitched_point_cloud, voxel_size, temp_registration.transformation)
         stitched_point_cloud += point_cloud
         o3d.visualization.draw_geometries([stitched_point_cloud])
@@ -246,9 +246,8 @@ if __name__ == "__main__":
     o3d.io.write_point_cloud("final_stitched_down.pcd", stitched_down)
     o3d.io.write_point_cloud("finalfinalfinal.pcd", scan_down)
     final_transform = np.eye(4)
-    # Global registration from the stitched point-cloud to the provided scan
-    # model_registration_global_first = execute_global_registration(stitched_down, scan_down, stitched_fpfh, scan_fpfh, voxel_size)
 
+    # Global registration from the provided scan to the stitched point-cloud
     model_registration_global = execute_fast_global_registration(scan_down, stitched_down)
     final_transform = np.matmul(model_registration_global.transformation, final_transform)
     scan_down.transform(model_registration_global.transformation)
@@ -273,8 +272,8 @@ if __name__ == "__main__":
     # Stitch the stitched .pcd to the model for visualization
     stitched_down += scan_down.transform(model_registration_refined.transformation)
     o3d.visualization.draw_geometries([stitched_down])
-	
-    #waits for the subscriber to get ready and then publishes the message
+
+    # waits for the subscriber to get ready and then publishes the message
     while entry_pose_pub.get_num_connections() == 0 or ball_pose_pub.get_num_connections() == 0:
         rospy.sleep(0.1)
 
